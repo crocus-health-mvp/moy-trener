@@ -213,8 +213,9 @@ svg.court .lbl{font-family:'Oswald',sans-serif;font-size:9px;fill:var(--ground);
 .send svg{width:19px;height:19px;stroke:var(--ground);fill:none;stroke-width:2}
 .send:disabled{opacity:.3}
 .seg{display:flex;border:1px solid var(--edge-2);border-radius:2px;margin:12px 20px 4px;overflow:hidden}
-.seg button{flex:1;padding:11px 6px;font-family:'Oswald',sans-serif;font-size:12px;
-  letter-spacing:.12em;text-transform:uppercase;color:var(--dim-2);transition:.15s}
+.seg button{flex:1;padding:11px 4px;font-family:'Oswald',sans-serif;font-size:11px;
+  letter-spacing:.08em;text-transform:uppercase;color:var(--dim-2);transition:.15s;
+  white-space:nowrap}
 .seg button.on{background:var(--ball);color:var(--ground)}
 .pf-head{display:flex;gap:15px;align-items:center;padding:22px 0 24px;
   border-bottom:1px solid var(--edge);margin-bottom:6px}
@@ -280,6 +281,73 @@ svg.court .lbl{font-family:'Oswald',sans-serif;font-size:9px;fill:var(--ground);
 .spin{width:22px;height:22px;border:2px solid var(--edge-2);border-top-color:var(--ball);
   border-radius:50%;animation:sp .7s linear infinite;margin:0 auto}
 @keyframes sp{to{transform:rotate(360deg)}}
+
+.sheet-hdr .undo{width:34px;height:34px;display:flex;align-items:center;justify-content:center;opacity:.65}
+.sheet-hdr .undo svg{width:18px;height:18px;stroke:var(--line);fill:none;stroke-width:1.7}
+.ch-score{display:flex;align-items:center;gap:12px;padding:14px 20px;
+  border-bottom:1px solid var(--edge);background:var(--court)}
+.ch-who{flex:1;min-width:0}
+.ch-who .t{font-family:'Oswald',sans-serif;font-size:13px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ball);margin-bottom:3px}
+.ch-who .d{font-size:11.5px;color:var(--dim-2)}
+.ch-pts{font-family:'Oswald',sans-serif;font-size:27px;line-height:1;
+  font-variant-numeric:tabular-nums}
+.ch-gms{font-family:'Oswald',sans-serif;font-size:13px;color:var(--dim);
+  padding-left:12px;border-left:1px solid var(--edge-2)}
+.ch-body{flex:1;overflow-y:auto;padding:18px 20px 20px}
+.ch-step{font-size:12.5px;color:var(--dim);margin-bottom:14px;line-height:1.5}
+.ch-step b{color:var(--ball);font-weight:600}
+svg.chc{width:100%;display:block;margin-bottom:16px}
+svg.chc .ln{stroke:var(--line);stroke-width:1;fill:none;opacity:.4}
+svg.chc .net{stroke:var(--line);stroke-width:2;opacity:.75}
+svg.chc .zn{fill:#DCF24B;opacity:.14;cursor:pointer;transition:opacity .12s}
+svg.chc .zn:active{opacity:.5}
+svg.chc .zt{font-family:'Oswald',sans-serif;font-size:7px;fill:var(--line);
+  letter-spacing:.08em;pointer-events:none;opacity:.8}
+svg.chc .dim{opacity:.05;pointer-events:none}
+.ch-btns{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:10px}
+.ch-btns.one{grid-template-columns:1fr}
+.chb{padding:16px 12px;border:1px solid var(--edge-2);border-radius:2px;
+  font-family:'Oswald',sans-serif;font-size:13px;letter-spacing:.08em;
+  text-transform:uppercase;transition:.14s;text-align:center}
+.chb:active{background:var(--court)}
+.chb.win{border-color:var(--ball);color:var(--ball)}
+.chb.lose{border-color:rgba(255,122,69,.5);color:var(--warn)}
+.chb.miss{color:var(--dim)}
+.ch-count{font-size:11.5px;color:var(--dim-2);text-align:center;padding-top:6px}
+.chart-item{display:flex;gap:13px;align-items:center;background:var(--court);
+  border-radius:2px;padding:14px;margin-bottom:9px;width:100%;text-align:left}
+.chart-item .n{font-family:'Oswald',sans-serif;font-size:15px;margin-bottom:3px}
+.chart-item .d{font-size:11.5px;color:var(--dim-2)}
+.upload{border:1px dashed var(--edge-2);border-radius:2px;padding:26px 20px;
+  text-align:center;margin-bottom:12px;transition:.15s}
+.upload:active{border-color:var(--ball);background:rgba(220,242,75,.04)}
+.up-ic{width:42px;height:42px;margin:0 auto 13px;border-radius:50%;
+  border:1px solid var(--edge-2);display:flex;align-items:center;justify-content:center}
+.up-ic svg{width:19px;height:19px;stroke:var(--ball);fill:none;stroke-width:1.6}
+.up-t{font-family:'Oswald',sans-serif;font-size:15px;letter-spacing:.04em;margin-bottom:5px}
+.up-d{font-size:12.5px;color:var(--dim-2);line-height:1.5}
+.vid{display:flex;gap:13px;align-items:center;background:var(--court);
+  border-radius:2px;padding:14px;margin-bottom:9px}
+.vid-ic{flex:0 0 38px;height:38px;border-radius:2px;background:var(--court-2);
+  display:flex;align-items:center;justify-content:center}
+.vid-ic svg{width:17px;height:17px;stroke:var(--dim);fill:none;stroke-width:1.5}
+.vid-b{flex:1;min-width:0}
+.vid-b .t{font-size:14px;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vid-b .d{font-size:11.5px;color:var(--dim-2)}
+.vid-x{flex:0 0 30px;height:30px;display:flex;align-items:center;justify-content:center;opacity:.5}
+.vid-x svg{width:15px;height:15px;stroke:var(--line);fill:none;stroke-width:1.7}
+.dblog{border:1px solid var(--edge);border-radius:2px;margin-bottom:12px;overflow:hidden}
+.dbrow{display:flex;gap:10px;align-items:baseline;padding:9px 13px;
+  border-bottom:1px solid var(--edge);font-size:12px}
+.dbrow:last-of-type{border-bottom:none}
+.dbrow .ok{color:var(--ball);flex:0 0 12px}
+.dbrow .no{color:var(--dim-2);flex:0 0 12px}
+.dbrow .nm{flex:1;color:var(--dim)}
+.dbrow .vl{color:var(--dim-2);font-family:'Oswald',sans-serif;font-size:11.5px}
+.dbnote{padding:10px 13px;background:rgba(143,163,184,.05);font-size:11px;
+  color:var(--dim-2);line-height:1.5}
+.note u{cursor:pointer;text-underline-offset:3px}
 .credit{font-size:11px;color:var(--dim-2);line-height:1.6;padding:18px 0 4px;
   border-top:1px solid var(--edge);margin-top:24px}
 @media print{body{background:#fff;color:#111}#app,.tabs{display:none!important}#printArea{display:block!important}}
@@ -393,7 +461,8 @@ svg.court .lbl{font-family:'Oswald',sans-serif;font-size:9px;fill:var(--ground);
       <input id="i-search" placeholder="Фамилия соперницы латиницей" oninput="onSearch(this.value)" autocapitalize="words">
     </div>
     <p style="color:var(--dim-2);font-size:12.5px;margin-bottom:18px">
-      Имена в базе латиницей. Введи только фамилию: Sabalenka, Rybakina, Andreeva.
+      Можно по-русски или латиницей: Сабаленка, Rybakina, Андреева.<br>
+      Вводи только фамилию. Имена нерусского происхождения лучше искать латиницей.
     </p>
     <div id="opp-list"></div>
   </div>
@@ -404,6 +473,7 @@ svg.court .lbl{font-family:'Oswald',sans-serif;font-size:9px;fill:var(--ground);
   <div class="seg">
     <button class="on" id="sg-chat" onclick="segTo('chat')">Диалог</button>
     <button id="sg-rep" onclick="segTo('rep')">Разборы</button>
+    <button id="sg-trn" onclick="segTo('trn')">Тренировки</button>
   </div>
   <div id="pane-chat" style="flex:1;display:flex;flex-direction:column;min-height:0">
     <div class="chat" id="chat"></div>
@@ -415,6 +485,7 @@ svg.court .lbl{font-family:'Oswald',sans-serif;font-size:9px;fill:var(--ground);
     </div>
   </div>
   <div id="pane-rep" style="flex:1;display:none;overflow-y:auto;padding:16px 20px 96px"></div>
+  <div id="pane-trn" style="flex:1;display:none;overflow-y:auto;padding:16px 20px 96px"></div>
 </section>
 
 <section class="screen" id="s-me">
@@ -510,6 +581,19 @@ svg.court .lbl{font-family:'Oswald',sans-serif;font-size:9px;fill:var(--ground);
   <div class="foot-fix"><button class="btn" onclick="saveEdit()">Сохранить</button></div>
 </section>
 
+
+<section class="sheet" id="sh-chart">
+  <div class="sheet-hdr"><button class="x" onclick="closeChart()">
+    <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <h3 id="chart-title">Разметка матча</h3>
+    <button class="undo" onclick="undoPoint()">
+      <svg viewBox="0 0 24 24"><path d="M9 14L4 9l5-5"/><path d="M4 9h11a5 5 0 010 10h-4"/></svg></button>
+  </div>
+  <div class="ch-score" id="ch-score"></div>
+  <div class="ch-body" id="ch-body"></div>
+  <div class="foot-fix"><button class="btn quiet" onclick="finishChart()">Завершить и посмотреть статистику</button></div>
+</section>
+
 <div class="toast" id="toast"></div>
 
 <nav class="tabs" id="tabs" style="display:none">
@@ -542,14 +626,17 @@ var CONFIG = {
   API:'https://moy-trener-ai.zhcg2b4hg4.workers.dev',
   MODEL:'claude-sonnet-4-6',
   BASE:'https://raw.githubusercontent.com/JeffSackmann/',
-  YEARS:[2026,2025,2024],
+  // основной тур — глубже, квалификация и ITF — только свежие
+  // (файлы за текущий год могут ещё не существовать, это нормально)
+  MAIN_YEARS:[2026,2025,2024,2023,2022],
+  ITF_YEARS:[2026,2025,2024],
   PRICE_SCOUT:4900
 };
 var KEY='moytrener.v2';
 
 var S={
   name:'',age:'',tour:'w',lvl:'ITF / Челленджер',hand:'Правая',bh:'Двуручный',
-  orders:[],mirror:false,hidden:false,current:null,chat:[],onboarded:false,_pending:null
+  orders:[],videos:[],charts:[],mirror:false,hidden:false,current:null,chat:[],onboarded:false,_pending:null
 };
 
 /* ═══ ХРАНЕНИЕ ═══ */
@@ -557,6 +644,7 @@ function save(){
   try{localStorage.setItem(KEY,JSON.stringify({
     name:S.name,age:S.age,tour:S.tour,lvl:S.lvl,hand:S.hand,bh:S.bh,
     mirror:S.mirror,hidden:S.hidden,onboarded:S.onboarded,
+    videos:S.videos.slice(0,8),charts:S.charts.slice(0,12),
     orders:S.orders.map(function(o){return {key:o.key}}),
     chat:S.chat.slice(-20)
   }));}catch(e){}
@@ -569,6 +657,8 @@ function load(){
     S.lvl=d.lvl||'ITF / Челленджер';S.hand=d.hand||'Правая';S.bh=d.bh||'Двуручный';
     S.mirror=!!d.mirror;S.hidden=!!d.hidden;S.onboarded=!!d.onboarded;
     S.chat=Array.isArray(d.chat)?d.chat:[];
+    S.videos=Array.isArray(d.videos)?d.videos:[];
+    S.charts=Array.isArray(d.charts)?d.charts:[];
     S._pending=d.orders||[];
     return true;
   }catch(e){return false}
@@ -629,16 +719,20 @@ function finishOnb(){
    Источник: Jeff Sackmann / Tennis Abstract, CC BY-NC-SA 4.0
    ══════════════════════════════════════════════════════════ */
 var DB={
-  ready:false, loading:false, rows:[], index:null, loadedTour:null, err:null,
+  ready:false, loading:false, rows:[], index:null, loadedTour:null, err:null, log:[],
 
   repo:function(){return S.tour==='w'?'tennis_wta':'tennis_atp'},
   pfx:function(){return S.tour==='w'?'wta':'atp'},
 
   files:function(){
     var f=[],self=this;
-    CONFIG.YEARS.forEach(function(y){
-      f.push(CONFIG.BASE+self.repo()+'/master/'+self.pfx()+'_matches_'+y+'.csv');
-      f.push(CONFIG.BASE+self.repo()+'/master/'+self.pfx()+'_matches_qual_itf_'+y+'.csv');
+    CONFIG.MAIN_YEARS.forEach(function(y){
+      f.push({u:CONFIG.BASE+self.repo()+'/master/'+self.pfx()+'_matches_'+y+'.csv',
+              n:'Тур '+y});
+    });
+    CONFIG.ITF_YEARS.forEach(function(y){
+      f.push({u:CONFIG.BASE+self.repo()+'/master/'+self.pfx()+'_matches_qual_itf_'+y+'.csv',
+              n:'Квал./ITF '+y});
     });
     return f;
   },
@@ -648,25 +742,42 @@ var DB={
     if(this.loading)return Promise.resolve();
     if(this.ready&&this.loadedTour===S.tour&&!force)return Promise.resolve();
     this.loading=true;this.ready=false;this.err=null;
-    this.rows=[];this.index=new Map();
+    this.rows=[];this.index=new Map();this.log=[];
     paintDbState(3);
 
-    var urls=this.files(),done=0;
-    return Promise.all(urls.map(function(u){
-      return fetch(u,{cache:'force-cache'}).then(function(r){
-        return r.ok?r.text():null;
-      }).catch(function(){return null}).then(function(t){
-        done++;paintDbState(Math.round(done/urls.length*100));return t;
+    var files=this.files(),done=0;
+    this.log=[];
+    return Promise.all(files.map(function(f){
+      return fetch(f.u,{cache:'force-cache'}).then(function(r){
+        if(!r.ok){self.log.push({n:f.n,ok:false,why:'нет файла ('+r.status+')'});return null}
+        return r.text();
+      }).catch(function(e){
+        self.log.push({n:f.n,ok:false,why:'сеть'});return null;
+      }).then(function(t){
+        done++;paintDbState(Math.round(done/files.length*100));
+        return t?{n:f.n,t:t}:null;
       });
     })).then(function(res){
-      res.forEach(function(t){if(t)self.ingest(t)});
+      res.forEach(function(x){
+        if(!x)return;
+        var before=self.rows.length;
+        self.ingest(x.t);
+        self.log.push({n:x.n,ok:true,cnt:self.rows.length-before});
+      });
+      self.log.sort(function(a,b){return (b.ok?1:0)-(a.ok?1:0)});
       self.loadedTour=S.tour;
       self.loading=false;
       self.ready=self.rows.length>0;
-      if(!self.ready)self.err='Не удалось загрузить базу матчей';
+      if(!self.ready)self.err='Ни один файл базы не загрузился';
       self.buildIndex();
       paintDbState();
       restoreOrders();
+    }).catch(function(e){
+      console.warn('DB',e);
+      self.loading=false;self.ready=self.rows.length>0;
+      if(!self.ready)self.err='Сбой при загрузке: '+(e&&e.message||'неизвестно');
+      try{self.buildIndex()}catch(_){}
+      paintDbState();
     });
   },
 
@@ -719,24 +830,72 @@ var DB={
     var add=function(name,row,won){
       if(!name)return;
       var k=name.toLowerCase();
-      if(!self.index.has(k))self.index.set(k,{name:name,key:k,matches:[]});
+      if(!self.index.has(k))
+        self.index.set(k,{name:name,key:k,flat:flat(name),matches:[]});
       self.index.get(k).matches.push({row:row,won:won});
     };
     this.rows.forEach(function(r){add(r.W,r,true);add(r.L,r,false)});
   },
 
   search:function(q){
-    q=q.trim().toLowerCase();
+    q=q.trim();
     if(q.length<2||!this.index)return [];
-    var out=[];
-    this.index.forEach(function(v,k){
-      if(out.length<80&&k.indexOf(q)>-1)out.push(v);
+    var probes = hasCyr(q) ? translit(q) : [flat(q)];
+    var out=[],seen={};
+    this.index.forEach(function(v){
+      if(out.length>=80)return;
+      for(var i=0;i<probes.length;i++){
+        if(probes[i] && v.flat.indexOf(probes[i])>-1){
+          if(!seen[v.key]){seen[v.key]=1;out.push(v)}
+          return;
+        }
+      }
     });
     return out.sort(function(a,b){return b.matches.length-a.matches.length}).slice(0,12);
   }
 };
 
 /* ═══ РАСЧЁТЫ ═══ */
+/* Кириллица → латиница. Для каждой неоднозначной буквы
+   генерируем варианты: Андреева → andreeva / andreyeva. */
+var TR={
+  'а':['a'],'б':['b'],'в':['v'],'г':['g'],'д':['d'],
+  'е':['e','ye','ie'],'ё':['e','io','yo'],'ж':['zh','j'],'з':['z'],
+  'и':['i'],'й':['i','y','j'],'к':['k'],'л':['l'],'м':['m'],'н':['n'],
+  'о':['o'],'п':['p'],'р':['r'],'с':['s'],'т':['t'],'у':['u'],
+  'ф':['f'],'х':['kh','h'],'ц':['ts','c'],'ч':['ch'],'ш':['sh'],
+  'щ':['shch','sch'],'ъ':[''],'ы':['y','i'],'ь':[''],
+  'э':['e'],'ю':['iu','yu','ju'],'я':['ia','ya','ja']
+};
+function hasCyr(s){return /[а-яё]/i.test(s)}
+function translitOne(s){
+  var out=[''];
+  for(var i=0;i<s.length;i++){
+    var v=TR[s[i]];
+    if(!v){ out=out.map(function(x){return x+s[i]}); continue }
+    var next=[];
+    out.forEach(function(x){ v.forEach(function(t){ next.push(x+t) }) });
+    // не даём комбинаторике взорваться
+    out=next.slice(0,24);
+  }
+  return out;
+}
+function translit(s){
+  s=s.toLowerCase();
+  var pre=[s];
+  if(s.indexOf('кс')>-1)pre.push(s.replace(/кс/g,'x'));   // Александрова → alexandrova
+  if(s.indexOf('кc')>-1)pre.push(s.replace(/кc/g,'x'));
+  var out=[];
+  pre.forEach(function(v){out=out.concat(translitOne(v))});
+  return out.filter(function(x,i,a){return x&&a.indexOf(x)===i}).slice(0,40);
+}
+/* Убираем диакритику: Świątek → swiatek, Muchová → muchova */
+function flat(s){
+  return String(s).toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .replace(/ł/g,'l').replace(/đ/g,'d').replace(/ø/g,'o');
+}
+
 function pct(a,b){return (b&&b>0)?(a/b*100):null}
 function fmt(v,d){return v==null?'—':v.toFixed(d===undefined?0:d)+'%'}
 function ymd(s){return (!s||s.length<8)?'':s.slice(6,8)+'.'+s.slice(4,6)+'.'+s.slice(0,4)}
@@ -837,6 +996,9 @@ function flags(P){
 
 /* ═══ ИНДИКАТОР БАЗЫ ═══ */
 function paintDbState(p){
+  try{ paintDbStateInner(p) }catch(e){ console.warn('db-state',e) }
+}
+function paintDbStateInner(p){
   var box=document.getElementById('db-state');
   var sub=document.getElementById('scout-sub');
   if(!box)return;
@@ -844,20 +1006,34 @@ function paintDbState(p){
     box.innerHTML='<div class="loader"><div class="eyebrow">Загружаю базу матчей</div>'+
       '<div class="load-bar"><i style="width:'+(p||3)+'%"></i></div>'+
       '<div class="load-txt">'+(S.tour==='w'?'WTA и ITF':'ATP и ITF')+' · '+
-      CONFIG.YEARS.join(', ')+'</div></div>';
+      CONFIG.MAIN_YEARS[CONFIG.MAIN_YEARS.length-1]+'–'+CONFIG.MAIN_YEARS[0]+'</div></div>';
     if(sub)sub.textContent='Загружаю базу…';
   }else if(DB.ready){
     box.innerHTML='<div class="note fact" style="margin-bottom:4px">'+
       '<svg viewBox="0 0 24 24"><path d="M5 13l4.5 4.5L19 7"/></svg>'+
       '<span>База загружена: '+DB.rows.length.toLocaleString('ru')+' матчей, '+
-      DB.index.size.toLocaleString('ru')+' игроков.</span></div>';
+      DB.index.size.toLocaleString('ru')+' игроков. '+
+      '<u onclick="toggleLog()">Подробнее</u></span></div>'+dbLogHtml();
     if(sub)sub.textContent=DB.index.size.toLocaleString('ru')+' игроков в базе';
   }else if(DB.err){
     box.innerHTML='<div class="note soft">'+
       '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.01"/></svg>'+
-      '<span>'+esc(DB.err)+'. Проверь интернет и обнови страницу.</span></div>';
+      '<span>'+esc(DB.err)+'. Проверь связь и обнови страницу. '+
+      '<u onclick="toggleLog()">Что не загрузилось</u></span></div>'+dbLogHtml();
     if(sub)sub.textContent='База недоступна';
   }else box.innerHTML='';
+}
+
+var logOpen=false;
+function toggleLog(){logOpen=!logOpen;paintDbState()}
+function dbLogHtml(){
+  if(!logOpen||!DB.log.length)return '';
+  return '<div class="dblog">'+DB.log.map(function(x){
+    return '<div class="dbrow"><span class="'+(x.ok?'ok':'no')+'">'+(x.ok?'✓':'—')+'</span>'+
+      '<span class="nm">'+esc(x.n)+'</span><span class="vl">'+
+      (x.ok?x.cnt.toLocaleString('ru')+' матчей':esc(x.why))+'</span></div>';
+  }).join('')+'<div class="dbnote">Отсутствующие файлы — это нормально: '+
+    'за текущий сезон они появляются по ходу года.</div></div>';
 }
 
 /* ═══ ГЛАВНАЯ ═══ */
@@ -1004,12 +1180,15 @@ function restoreOrders(){
 
 /* ═══ РАЗБОРЫ ═══ */
 function segTo(w){
-  var c=(w==='chat');
-  document.getElementById('pane-chat').style.display=c?'flex':'none';
-  document.getElementById('pane-rep').style.display=c?'none':'block';
-  document.getElementById('sg-chat').classList.toggle('on',c);
-  document.getElementById('sg-rep').classList.toggle('on',!c);
-  if(!c)paintReports();
+  var map={chat:'pane-chat',rep:'pane-rep',trn:'pane-trn'};
+  var btn={chat:'sg-chat',rep:'sg-rep',trn:'sg-trn'};
+  Object.keys(map).forEach(function(k){
+    document.getElementById(map[k]).style.display =
+      (k===w) ? (k==='chat'?'flex':'block') : 'none';
+    document.getElementById(btn[k]).classList.toggle('on',k===w);
+  });
+  if(w==='rep')paintReports();
+  if(w==='trn')paintTraining();
 }
 function paintReports(){
   var box=document.getElementById('pane-rep');if(!box)return;
@@ -1130,6 +1309,393 @@ function renderPlan(txt){
   return txt.split(/\n{2,}/).filter(function(p){return p.trim()}).map(function(p,i){
     return '<div class="card lit"><h3 style="color:var(--ball)">'+(i+1)+'</h3>'+
       '<p style="color:var(--line)">'+esc(p.trim())+'</p></div>'}).join('');
+}
+
+
+/* ═══════════════════════════════════════════════════
+   ТРЕНИРОВКИ
+   Два блока:
+   1) Загрузка видео — очередь под будущий разбор
+      компьютерным зрением. Честно помечено, что
+      автоматический разбор пока не подключён.
+   2) Разбор чужой тактики — работает на уже
+      посчитанных числах, видео не требует.
+   ═══════════════════════════════════════════════════ */
+
+function paintTraining(){
+  var box=document.getElementById('pane-trn');
+  if(!box)return;
+
+  var vids=S.videos.length ? S.videos.map(function(v,i){
+    return '<div class="vid">'+
+      '<div class="vid-ic"><svg viewBox="0 0 24 24"><path d="M4 6h11a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1V7a1 1 0 011-1z"/><path d="M16 10l5-3v10l-5-3"/></svg></div>'+
+      '<div class="vid-b"><div class="t">'+esc(v.name)+'</div>'+
+      '<div class="d">'+v.size+' · '+esc(v.date)+' · в очереди на разбор</div></div>'+
+      '<button class="vid-x" onclick="dropVideo('+i+')">'+
+      '<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>';
+  }).join('') : '';
+
+  var opts=S.orders.map(function(P){
+    return '<button class="opp" onclick="copyTactics(\'' + attr(P.key) + '\')">'+
+      '<div class="opp-ph">'+esc(ini(P.name))+'</div>'+
+      '<div class="opp-i"><div class="n">'+esc(P.name)+'</div>'+
+      '<div class="d">Разобрать её сильные стороны</div></div></button>';
+  }).join('');
+
+  var charts = S.charts.length ? S.charts.map(function(c){
+    return '<button class="chart-item" onclick="openChart(\''+attr(c.id)+'\')">'+
+      '<div class="opp-ph">'+esc(ini(c.opp))+'</div>'+
+      '<div class="opp-i"><div class="n">'+esc(c.opp)+'</div>'+
+      '<div class="d">'+c.points.length+' очков · '+esc(c.date)+' · продолжить</div></div></button>';
+  }).join('') : '';
+
+  box.innerHTML=
+    '<div class="sec-title" style="margin-top:0"><span class="eyebrow">Разметка матча</span></div>'+
+    '<p style="color:var(--dim);font-size:13.5px;line-height:1.55;margin-bottom:14px">'+
+      'Смотришь запись и тапаешь: куда легла подача, чем закончилось очко. '+
+      'Матч размечается примерно за час — на выходе то, чего нет ни в одной базе: '+
+      'направление подачи в конкретном счёте.</p>'+
+    '<button class="btn ghost" onclick="newChart()" style="margin-bottom:12px">Разметить матч</button>'+
+    (charts?'<div class="sec-title"><span class="eyebrow">Начатые</span></div>'+charts:'')+
+
+    '<div class="sec-title"><span class="eyebrow">Своя игра</span></div>'+
+    '<div class="upload" onclick="pickVideo()">'+
+      '<div class="up-ic"><svg viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 16v3a1 1 0 001 1h14a1 1 0 001-1v-3"/></svg></div>'+
+      '<div class="up-t">Загрузить видео тренировки</div>'+
+      '<div class="up-d">Матч или отработка. Чем длиннее — тем точнее разбор.</div>'+
+    '</div>'+
+    '<input type="file" id="f-video" accept="video/*" style="display:none" onchange="onVideo(this)">'+
+    (vids?'<div class="sec-title"><span class="eyebrow">Загруженные</span></div>'+vids:'')+
+    '<div class="note soft" style="margin-top:14px">'+
+      '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.01"/></svg>'+
+      '<span>Автоматический разбор видео — следующий этап: нужна отдельная система '+
+      'компьютерного зрения, которая размечает удары и траектории. Сейчас файл '+
+      'становится в очередь, разбор делает тренер вручную.</span></div>'+
+
+    '<div class="sec-title"><span class="eyebrow">Взять у соперника</span></div>'+
+    '<p style="color:var(--dim);font-size:13.5px;line-height:1.55;margin-bottom:14px">'+
+      'Разбирая соперницу, ты видишь и то, что у неё работает. '+
+      'Выбери разбор — соберу, что из её игры стоит перенести в свою и как это тренировать.</p>'+
+    (opts||'<div class="empty" style="padding:34px 20px"><div class="e-t">Нет разборов</div>'+
+      '<p>Закажи разбор во вкладке «Анализ» — и здесь можно будет разобрать её сильные стороны.</p></div>')+
+    '<div id="tactics-out"></div>';
+}
+
+function pickVideo(){document.getElementById('f-video').click()}
+
+function onVideo(inp){
+  var f=inp.files&&inp.files[0];
+  if(!f)return;
+  var mb=f.size/1048576;
+  S.videos.unshift({
+    name:f.name.length>40?f.name.slice(0,37)+'…':f.name,
+    size: mb>=1 ? mb.toFixed(1)+' МБ' : Math.round(f.size/1024)+' КБ',
+    date: new Date().toLocaleDateString('ru',{day:'2-digit',month:'short'})
+  });
+  S.videos=S.videos.slice(0,8);
+  save();paintTraining();
+  toast('Видео принято. Разбор появится после проверки тренером');
+  inp.value='';
+}
+
+function dropVideo(i){S.videos.splice(i,1);save();paintTraining()}
+
+function copyTactics(key){
+  var P=null;
+  for(var i=0;i<S.orders.length;i++)if(S.orders[i].key===key)P=S.orders[i];
+  if(!P){toast('Разбор не найден');return}
+
+  var out=document.getElementById('tactics-out');
+  out.innerHTML='<div class="loader"><div class="spin"></div></div>';
+
+  if(!apiReady()){
+    out.innerHTML=localTactics(P);
+    return;
+  }
+
+  var prompt='Ты — тренер по теннису. Ниже РЕАЛЬНАЯ статистика игрока из базы матчей.\n\n'+
+    dataBrief(P)+'\n\nМой подопечный: '+S.name+', '+S.age+' лет, уровень '+S.lvl+', '+
+    S.hand+' рука, '+S.bh+' бэкхенд.\n\n'+
+    'Определи по числам, что у этого игрока работает лучше всего, и предложи ровно три вещи, '+
+    'которые моему подопечному стоит перенять, с конкретным упражнением на тренировку для каждой.\n'+
+    'СТРОГО: опирайся только на приведённые числа. Не выдумывай технику, направления ударов '+
+    'и манеру игры — этих данных у тебя НЕТ. Если из чисел вывод не следует — не пиши его.\n'+
+    'Формат: три абзаца, без заголовков и списков, без вступления. По-русски.';
+
+  fetch(CONFIG.API,{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({model:CONFIG.MODEL,max_tokens:1000,
+      messages:[{role:'user',content:prompt}]})})
+  .then(function(r){return r.ok?r.json():null})
+  .then(function(d){
+    var t=d?(d.content||[]).map(function(i){return i.text||''}).join('').trim():'';
+    out.innerHTML = t
+      ? '<div class="sec-title"><span class="eyebrow">Что перенять у '+esc(P.name)+'</span></div>'+renderPlan(t)
+      : localTactics(P);
+  })
+  .catch(function(){out.innerHTML=localTactics(P)});
+}
+
+/* Запасной вариант без сети — на посчитанных числах */
+function localTactics(P){
+  var s=P.serve,r=P.ret,items=[];
+  if(s.won1!=null&&s.won1>=65)items.push(['Первая подача',
+    'Забирает '+fmt(s.won1,1)+' очков после первой. Это про надёжность первого мяча после подачи, а не про скорость. На тренировке: подача плюс первый удар связкой, серия по двадцать.']);
+  if(s.in1!=null&&s.in1>=62)items.push(['Стабильность подачи',
+    fmt(s.in1,1)+' первых в корте. Держать процент важнее, чем добавлять скорость. На тренировке: серия из десяти подач с задачей попасть восемь, скорость вторична.']);
+  if(s.bp!=null&&s.bp>=60&&s.bpF>=15)items.push(['Игра под давлением',
+    'Спасает '+fmt(s.bp,1)+' брейк-пойнтов. На тренировке: розыгрыши со счёта 30:40, чтобы важные очки перестали быть особенными.']);
+  if(r.bpConv!=null&&r.bpConv>=42&&r.bpF>=15)items.push(['Реализация моментов',
+    'Забирает '+fmt(r.bpConv,1)+' брейк-пойнтов на приёме. На тренировке: приём со счёта 40:30 в свою пользу, задача — дожать гейм.']);
+  if(r.vs2!=null&&r.vs2>=52)items.push(['Приём второй подачи',
+    'Выигрывает '+fmt(r.vs2,1)+' очков против второй. Это главный ресурс в любом матче. На тренировке: приём второй подачи из корта, а не из-за задней.']);
+
+  if(!items.length)return '<div class="card"><p>По числам у неё нет выраженно сильной стороны — переносить особо нечего. Стройте свою игру.</p></div>';
+
+  return '<div class="sec-title"><span class="eyebrow">Что перенять у '+esc(P.name)+'</span></div>'+
+    items.slice(0,3).map(function(x,i){
+      return '<div class="card lit"><h3>'+esc(x[0])+'</h3><p style="color:var(--line)">'+esc(x[1])+'</p></div>';
+    }).join('')+
+    '<div class="bar-n" style="margin-top:4px">Собрано по посчитанным числам, без ИИ.</div>';
+}
+
+
+/* ═══════════════════════════════════════════════════════════
+   РАЗМЕТКА МАТЧА
+   Тренер тапает по схеме: куда подача, чем закончилось очко.
+   Даёт то, чего нет ни в одной открытой базе — направление
+   подачи в конкретном счёте. Матч размечается примерно за час.
+   ═══════════════════════════════════════════════════════════ */
+
+var CH = null;   // текущая разметка
+
+function newChart(){
+  var opp = prompt('Соперница (как записать в разборе):','');
+  if(opp===null)return;
+  CH = {
+    id:'c'+Date.now(),
+    opp:(opp||'Без имени').trim(),
+    date:new Date().toLocaleDateString('ru',{day:'2-digit',month:'short',year:'2-digit'}),
+    points:[],           // размеченные очки
+    srv:'me',            // кто подаёт
+    pts:[0,0],           // очки в гейме [я, соперница]
+    gms:[0,0],           // геймы
+    stage:'serve1',      // serve1 | serve2 | outcome
+    pendingDir:null
+  };
+  openSheet('sh-chart');
+  drawChart();
+}
+
+function openChart(id){
+  var c=null;
+  for(var i=0;i<S.charts.length;i++)if(S.charts[i].id===id)c=S.charts[i];
+  if(!c){toast('Разметка не найдена');return}
+  CH=c;
+  if(CH.stage===undefined)CH.stage='serve1';
+  openSheet('sh-chart');drawChart();
+}
+function closeChart(){saveChart();closeSheet('sh-chart');paintTraining()}
+
+function saveChart(){
+  if(!CH)return;
+  var i=-1;
+  for(var k=0;k<S.charts.length;k++)if(S.charts[k].id===CH.id)i=k;
+  if(i>=0)S.charts[i]=CH; else S.charts.unshift(CH);
+  S.charts=S.charts.slice(0,12);
+  save();
+}
+
+/* ── счёт ── */
+function ptLabel(a,b){
+  var N=['0','15','30','40'];
+  if(a>=3&&b>=3){
+    if(a===b)return 'Ровно';
+    return a>b?'Больше':'Меньше';
+  }
+  return N[Math.min(a,3)]+':'+N[Math.min(b,3)];
+}
+function scoreKey(){
+  var a=CH.pts[0],b=CH.pts[1];
+  if(a>=3&&b>=3)return a===b?'deuce':(a>b?'adv':'def');
+  if(b===3&&a<3)return 'bp';            // брейк-пойнт против подающего
+  if(a===3&&b<3)return 'gp';
+  if(a===2&&b===2)return 'thirty';
+  return 'norm';
+}
+function isKeyPoint(){
+  var k=scoreKey();
+  return k==='deuce'||k==='adv'||k==='def'||k==='bp'||k==='thirty';
+}
+function sideNow(){ return (CH.pts[0]+CH.pts[1])%2===0 ? 'd' : 'a' }
+
+function awardPoint(toMe){
+  CH.pts[toMe?0:1]++;
+  var a=CH.pts[0],b=CH.pts[1];
+  if((a>=4||b>=4)&&Math.abs(a-b)>=2){
+    CH.gms[a>b?0:1]++;
+    CH.pts=[0,0];
+    CH.srv = CH.srv==='me' ? 'opp' : 'me';
+  }
+  CH.stage='serve1';CH.pendingDir=null;
+  saveChart();drawChart();
+}
+
+function tapZone(dir){
+  CH.pendingDir=dir;
+  CH.stage='outcome';
+  drawChart();
+}
+function serveMiss(){
+  if(CH.stage==='serve1'){CH.stage='serve2';CH.pendingDir=null;drawChart();return}
+  // двойная
+  CH.points.push({srv:CH.srv,side:sideNow(),dir:null,first:false,
+    out:'df',key:scoreKey(),sc:ptLabel(CH.pts[0],CH.pts[1])});
+  awardPoint(CH.srv!=='me');
+}
+function outcome(kind){
+  CH.points.push({srv:CH.srv,side:sideNow(),dir:CH.pendingDir,
+    first:CH.stage!=='serve2'&&CH.prevStage!=='serve2',
+    out:kind,key:scoreKey(),sc:ptLabel(CH.pts[0],CH.pts[1])});
+  if(kind==='ace')      awardPoint(CH.srv==='me');
+  else if(kind==='win') awardPoint(true);
+  else                  awardPoint(false);
+}
+function undoPoint(){
+  if(!CH)return;
+  if(CH.stage!=='serve1'){CH.stage='serve1';CH.pendingDir=null;drawChart();return}
+  if(!CH.points.length){toast('Нечего отменять');return}
+  CH.points.pop();
+  // пересчитываем счёт с нуля — надёжнее, чем откатывать
+  var pts=[0,0],gms=[0,0],srv='me';
+  CH.points.forEach(function(p){
+    var me = p.out==='ace' ? (p.srv==='me') : p.out==='df' ? (p.srv!=='me') : (p.out==='win');
+    pts[me?0:1]++;
+    if((pts[0]>=4||pts[1]>=4)&&Math.abs(pts[0]-pts[1])>=2){
+      gms[pts[0]>pts[1]?0:1]++;pts=[0,0];srv=srv==='me'?'opp':'me';
+    }
+  });
+  CH.pts=pts;CH.gms=gms;CH.srv=srv;CH.stage='serve1';CH.pendingDir=null;
+  saveChart();drawChart();
+}
+
+/* ── схема корта для разметки ── */
+function chartCourt(){
+  var side=sideNow();
+  // порядок зон слева направо зависит от стороны подачи
+  var zones = side==='d'
+    ? [['t','В угол',26],['b','В тело',48],['w','Широко',70]]
+    : [['w','Широко',26],['b','В тело',48],['t','В угол',70]];
+  var boxX = side==='d' ? 60 : 22;   // активный квадрат подачи
+  var g='';
+  zones.forEach(function(z){
+    var x = boxX + (z[2]-26)*0.46;
+    g += '<rect class="zn" x="'+x+'" y="16" width="17" height="26" rx="1" '+
+         'onclick="tapZone(\''+z[0]+'\')"/>'+
+         '<text class="zt" x="'+(x+8.5)+'" y="31" text-anchor="middle">'+z[1]+'</text>';
+  });
+  var dead = side==='d' ? 22 : 60;
+  return '<svg class="chc" viewBox="0 0 118 84">'+
+    '<rect class="zn dim" x="'+dead+'" y="16" width="36" height="26"/>'+
+    g+
+    '<rect class="ln" x="12" y="6" width="94" height="72"/>'+
+    '<line class="ln" x1="22" y1="6" x2="22" y2="78"/>'+
+    '<line class="ln" x1="96" y1="6" x2="96" y2="78"/>'+
+    '<line class="ln" x1="22" y1="42" x2="96" y2="42"/>'+
+    '<line class="ln" x1="59" y1="16" x2="59" y2="42"/>'+
+    '<line class="net" x1="6" y1="16" x2="112" y2="16"/>'+
+    '</svg>';
+}
+
+function drawChart(){
+  if(!CH)return;
+  document.getElementById('chart-title').textContent='Матч · '+CH.opp;
+
+  var srvMe = CH.srv==='me';
+  document.getElementById('ch-score').innerHTML=
+    '<div class="ch-who"><div class="t">'+(srvMe?'Подаёшь ты':'Подаёт соперница')+'</div>'+
+    '<div class="d">'+(sideNow()==='d'?'Правый квадрат':'Левый квадрат')+
+    (isKeyPoint()?' · важное очко':'')+'</div></div>'+
+    '<div class="ch-pts">'+ptLabel(CH.pts[0],CH.pts[1])+'</div>'+
+    '<div class="ch-gms">'+CH.gms[0]+':'+CH.gms[1]+'</div>';
+
+  var body=document.getElementById('ch-body'),html='';
+
+  if(CH.stage==='outcome'){
+    html+='<div class="ch-step">Подача прошла. <b>Чем закончилось очко?</b></div>'+
+      '<div class="ch-btns">'+
+      '<button class="chb win" onclick="outcome(\'ace\')">Эйс</button>'+
+      '<button class="chb miss" onclick="backToServe()">Не туда нажал</button>'+
+      '</div>'+
+      '<div class="ch-btns">'+
+      '<button class="chb win" onclick="outcome(\'win\')">Очко твоё</button>'+
+      '<button class="chb lose" onclick="outcome(\'lose\')">Очко её</button>'+
+      '</div>';
+  }else{
+    var second = CH.stage==='serve2';
+    html+='<div class="ch-step">'+(second?'<b>Вторая подача.</b> ':'<b>Первая подача.</b> ')+
+      'Тапни зону, куда она легла.</div>'+ chartCourt()+
+      '<div class="ch-btns one"><button class="chb '+(second?'lose':'miss')+'" onclick="serveMiss()">'+
+      (second?'Мимо — двойная':'Мимо — вторая подача')+'</button></div>';
+  }
+
+  html+='<div class="ch-count">Размечено очков: '+CH.points.length+'</div>';
+  body.innerHTML=html;
+}
+function backToServe(){CH.stage='serve1';CH.pendingDir=null;drawChart()}
+
+/* ── статистика по разметке ── */
+function chartStats(c){
+  var srv=c.points.filter(function(p){return p.srv==='opp'});   // её подача
+  if(srv.length<6)return null;
+  var first=srv.filter(function(p){return p.out!=='df'&&p.first});
+  var dirs={w:0,b:0,t:0},dirsKey={w:0,b:0,t:0},keyN=0;
+  srv.forEach(function(p){
+    if(p.dir){dirs[p.dir]++;
+      if(p.key!=='norm'&&p.key!=='gp'){dirsKey[p.dir]++;keyN++}}
+  });
+  var tot=dirs.w+dirs.b+dirs.t;
+  return {
+    n:srv.length,
+    df:srv.filter(function(p){return p.out==='df'}).length,
+    ace:srv.filter(function(p){return p.out==='ace'}).length,
+    won:srv.filter(function(p){return p.out==='lose'||p.out==='ace'}).length,
+    dirs:dirs, tot:tot, dirsKey:dirsKey, keyN:keyN
+  };
+}
+function finishChart(){
+  saveChart();
+  var st=chartStats(CH);
+  if(!st){toast('Нужно хотя бы шесть очков на её подаче');return}
+  var DIR={w:'широко',b:'в тело',t:'в угол'};
+  var pc=function(a,b){return b>0?Math.round(a/b*100)+'%':'—'};
+  var rows=['w','b','t'].map(function(d){
+    return '<div class="bar"><div class="bar-h"><span class="k">Подача '+DIR[d]+
+      '</span><span class="v">'+pc(st.dirs[d],st.tot)+'</span></div>'+
+      '<div class="bar-t"><i style="width:'+(st.tot?st.dirs[d]/st.tot*100:0)+'%"></i></div></div>';
+  }).join('');
+  var keyRows = st.keyN>=4 ? ['w','b','t'].map(function(d){
+    return '<div class="bar"><div class="bar-h"><span class="k">'+DIR[d]+
+      '</span><span class="v">'+pc(st.dirsKey[d],st.keyN)+'</span></div>'+
+      '<div class="bar-t"><i style="width:'+(st.dirsKey[d]/st.keyN*100)+'%"></i></div></div>';
+  }).join('') : '';
+
+  document.getElementById('rep-title').textContent='Разметка · '+CH.opp;
+  document.getElementById('rep-body').innerHTML=
+    '<div class="note fact"><svg viewBox="0 0 24 24"><path d="M5 13l4.5 4.5L19 7"/></svg>'+
+    '<span>Собрано из твоей разметки: '+st.n+' очков на её подаче.</span></div>'+
+    '<div class="stat-grid">'+
+    '<div class="st"><div class="v">'+pc(st.won,st.n)+'</div><div class="l">Выиграла на подаче</div></div>'+
+    '<div class="st"><div class="v mid">'+st.ace+'</div><div class="l">Эйсов</div></div>'+
+    '<div class="st"><div class="v '+(st.df>st.n*0.08?'low':'mid')+'">'+st.df+'</div><div class="l">Двойных</div></div>'+
+    '<div class="st"><div class="v mid">'+st.tot+'</div><div class="l">Подач размечено</div></div></div>'+
+    '<div class="sec-title"><span class="eyebrow">Куда подаёт</span></div>'+rows+
+    (keyRows?'<div class="sec-title"><span class="eyebrow">В важных очках · '+st.keyN+'</span></div>'+
+      keyRows+'<div class="bar-n">Ровно, больше/меньше, брейк-пойнты и счёт 30:30</div>':
+      '<div class="bar-n">Важных очков пока мало — размечай дальше, там самое ценное.</div>')+
+    '<div class="credit">Это данные, которых нет ни в одной открытой базе: '+
+    'направление подачи в конкретном счёте. Разметка — твоя.</div>';
+  closeSheet('sh-chart');
+  openSheet('sh-rep');
 }
 
 /* ═══ ИИ ═══ */

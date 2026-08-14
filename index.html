@@ -630,7 +630,8 @@ var CONFIG = {
   // (файлы за текущий год могут ещё не существовать, это нормально)
   MAIN_YEARS:[2026,2025,2024,2023,2022],
   ITF_YEARS:[2026,2025,2024],
-  PRICE_SCOUT:4900
+  PRICE_SCOUT:4900,
+  VERSION:'v4 · прокси через воркер'
 };
 var KEY='moytrener.v2';
 
@@ -761,7 +762,7 @@ var DB={
         self.log.push({n:f.n,ok:false,why:lastWhy||'недоступен'});
         return Promise.resolve(null);
       }
-      return fetch(f.urls[i],{cache:'force-cache'}).then(function(r){
+      return fetch(f.urls[i],{cache:'default'}).then(function(r){
         if(!r.ok)return tryUrls(f,i+1,r.status===404?'нет файла (404)':'ошибка '+r.status);
         return r.text().then(function(t){
           if(!t||t.length<80)return tryUrls(f,i+1,'пустой ответ');
@@ -1023,7 +1024,7 @@ function paintDbStateInner(p){
   if(DB.loading){
     box.innerHTML='<div class="loader"><div class="eyebrow">Загружаю базу матчей</div>'+
       '<div class="load-bar"><i style="width:'+(p||3)+'%"></i></div>'+
-      '<div class="load-txt">'+(S.tour==='w'?'WTA и ITF':'ATP и ITF')+' · '+
+      '<div class="load-txt">'+CONFIG.VERSION+' · '+(S.tour==='w'?'WTA и ITF':'ATP и ITF')+' · '+
       CONFIG.MAIN_YEARS[CONFIG.MAIN_YEARS.length-1]+'–'+CONFIG.MAIN_YEARS[0]+'</div></div>';
     if(sub)sub.textContent='Загружаю базу…';
   }else if(DB.ready){
@@ -1073,8 +1074,8 @@ function paintHome(){
   var c='Данные матчей: Jeff Sackmann / Tennis Abstract, лицензия CC BY-NC-SA 4.0. '+
     'Использование в прототипе — некоммерческое. Для платного запуска нужна отдельная '+
     'договорённость с автором данных либо лицензированный источник.';
-  document.getElementById('credit').textContent=c;
-  document.getElementById('credit2').textContent=c;
+  document.getElementById('credit').textContent=CONFIG.VERSION+'. '+c;
+  document.getElementById('credit2').textContent=CONFIG.VERSION+'. '+c;
 }
 
 /* ═══ ПОИСК ═══ */

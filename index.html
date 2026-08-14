@@ -625,13 +625,11 @@ var CONFIG = {
   // Cloudflare Worker — прокси к Anthropic API (ключ хранится в воркере)
   API:'https://moy-trener-ai.zhcg2b4hg4.workers.dev',
   MODEL:'claude-sonnet-4-6',
-  BASE:'https://raw.githubusercontent.com/JeffSackmann/',
-  // основной тур — глубже, квалификация и ITF — только свежие
-  // (файлы за текущий год могут ещё не существовать, это нормально)
-  MAIN_YEARS:[2026,2025,2024,2023,2022],
-  ITF_YEARS:[2026,2025,2024],
+  // Источник: TennisMyLife (MIT). Репозиторий Сакманна удалён в 2026.
+  BASE:'https://stats.tennismylife.org/data/',
+  YEARS:[2026,2025,2024,2023,2022],
   PRICE_SCOUT:4900,
-  VERSION:'v7'
+  VERSION:'v8 · TennisMyLife'
 };
 var KEY='moytrener.v2';
 
@@ -717,33 +715,35 @@ function finishOnb(){
 
 /* ══════════════════════════════════════════════════════════
    БАЗА МАТЧЕЙ
-   Источник: Jeff Sackmann / Tennis Abstract, CC BY-NC-SA 4.0
+   Источник: TennisMyLife (MIT)
    ══════════════════════════════════════════════════════════ */
 var DB={
   ready:false, loading:false, rows:[], index:null, loadedTour:null, err:null, log:[],
 
-  repo:function(){return S.tour==='w'?'tennis_wta':'tennis_atp'},
-  pfx:function(){return S.tour==='w'?'wta':'atp'},
-
-  /* Основной путь — через собственный воркер: запрос к GitHub делает
+  /* Основной путь — через собственный воркер: внешний запрос делает
      Cloudflare, а не браузер, поэтому блокировки у провайдера не мешают.
-     Запасной — напрямую, если воркер недоступен. */
+     Запасной — напрямую. */
   urls:function(name){
-    var direct=CONFIG.BASE+this.repo()+'/master/'+name;
+    var direct=CONFIG.BASE+name;
     var viaWorker=(CONFIG.API&&CONFIG.API.indexOf('http')===0)
       ? CONFIG.API.replace(/\/+$/,'')+'/data?f='+encodeURIComponent(name) : null;
     return viaWorker ? [viaWorker,direct] : [direct];
   },
   files:function(){
-    var f=[],self=this;
-    CONFIG.MAIN_YEARS.forEach(function(y){
-      var n=self.pfx()+'_matches_'+y+'.csv';
+    var f=[],self=this,w=(S.tour==='w');
+    CONFIG.YEARS.forEach(function(y){
+      var n = w ? (y+'_wta.csv') : (y+'.csv');
       f.push({name:n,urls:self.urls(n),n:'Тур '+y});
     });
-    CONFIG.ITF_YEARS.forEach(function(y){
-      var n=self.pfx()+'_matches_qual_itf_'+y+'.csv';
-      f.push({name:n,urls:self.urls(n),n:'Квал./ITF '+y});
-    });
+    if(!w){
+      // у мужчин доступны ещё и челленджеры
+      CONFIG.YEARS.slice(0,3).forEach(function(y){
+        var n=y+'_challenger.csv';
+        f.push({name:n,urls:self.urls(n),n:'Челленджер '+y});
+      });
+    }
+    var og = w ? 'wta_ongoing_tourneys.csv' : 'ongoing_tourneys.csv';
+    f.push({name:og,urls:self.urls(og),n:'Текущие турниры'});
     return f;
   },
 
@@ -759,7 +759,7 @@ var DB={
     this.log=[];
     var tryUrls=function(f,i,why){
       why=why||[];
-      var tag=(i===0?'воркер':'GitHub');
+      var tag=(i===0?'воркер':'напрямую');
       if(i>=f.urls.length){
         self.log.push({n:f.n,ok:false,why:why.join(' · ')||'недоступен'});
         return Promise.resolve(null);
@@ -1034,8 +1034,8 @@ function paintDbStateInner(p){
   if(DB.loading){
     box.innerHTML='<div class="loader"><div class="eyebrow">Загружаю базу матчей</div>'+
       '<div class="load-bar"><i style="width:'+(p||3)+'%"></i></div>'+
-      '<div class="load-txt">'+CONFIG.VERSION+' · '+(S.tour==='w'?'WTA и ITF':'ATP и ITF')+' · '+
-      CONFIG.MAIN_YEARS[CONFIG.MAIN_YEARS.length-1]+'–'+CONFIG.MAIN_YEARS[0]+'</div></div>';
+      '<div class="load-txt">'+CONFIG.VERSION+' · '+(S.tour==='w'?'WTA':'ATP')+' · '+
+      CONFIG.YEARS[CONFIG.YEARS.length-1]+'–'+CONFIG.YEARS[0]+'</div></div>';
     if(sub)sub.textContent='Загружаю базу…';
   }else if(DB.ready){
     box.innerHTML='<div class="note fact" style="margin-bottom:4px">'+
@@ -1061,7 +1061,7 @@ function toggleLog(){logOpen=!logOpen;paintDbState()}
 function pingWorker(){
   var out=document.getElementById('ping-out');
   out.innerHTML='<div class="spin"></div>';
-  var u=CONFIG.API.replace(/\/+$/,'')+'/data?f=wta_matches_2024.csv&fresh=1';
+  var u=CONFIG.API.replace(/\/+$/,'')+'/data?f='+(S.tour==='w'?'2024_wta.csv':'2024.csv')+'&fresh=1';
   fetch(u).then(function(r){
     return r.text().then(function(t){
       var real=t.length>500&&t.slice(0,200).indexOf('tourney_id')>-1;
@@ -1108,9 +1108,9 @@ function paintHome(){
     return '<div class="trn"><div class="trn-date"><div class="d num">'+t[0]+
       '</div><div class="m">'+t[1]+'</div></div><div class="trn-body"><div class="t">'+
       t[2]+'</div><div class="p">'+t[3]+'</div></div></div>'}).join('');
-  var c='Данные матчей: Jeff Sackmann / Tennis Abstract, лицензия CC BY-NC-SA 4.0. '+
-    'Использование в прототипе — некоммерческое. Для платного запуска нужна отдельная '+
-    'договорённость с автором данных либо лицензированный источник.';
+  var c='Данные матчей: TennisMyLife (stats.tennismylife.org), лицензия MIT. '+
+    'Прежний источник — репозиторий Jeff Sackmann — закрыт автором в 2026 году. '+
+    'Разметка матчей внутри приложения — собственные данные пользователя.';
   document.getElementById('credit').textContent=CONFIG.VERSION+'. '+c;
   document.getElementById('credit2').textContent=CONFIG.VERSION+'. '+c;
 }
@@ -1356,7 +1356,7 @@ function openReport(key){
       '<span>Нажми «Собрать» — тренер разберёт эти числа и даст три решения на корт.</span></div>')+'</div>'+
 
     '<div class="sec-title"><span class="eyebrow">Последние матчи</span></div>'+mt+
-    '<div class="credit">Данные матчей: Jeff Sackmann / Tennis Abstract (CC BY-NC-SA 4.0). '+
+    '<div class="credit">Данные матчей: TennisMyLife (MIT). '+
     'Тактические выводы сформированы ИИ на основе этих чисел и требуют проверки на корте.</div>';
   openSheet('sh-rep');
 }
@@ -1856,7 +1856,7 @@ function savePdf(){
         esc(q.tourney)+', '+surfRu(q.surface)+'</td><td style="text-align:right;color:#666">'+
         esc(String(q.score||'').slice(0,18))+'</td></tr>'}).join('')+'</table>'+
     '<p style="margin-top:30px;font-size:10.5px;color:#888;border-top:1px solid #ccc;padding-top:11px;line-height:1.6">'+
-    'Подготовлено для '+esc(S.name)+'. Данные матчей: Jeff Sackmann / Tennis Abstract, CC BY-NC-SA 4.0. '+
+    'Подготовлено для '+esc(S.name)+'. Данные матчей: TennisMyLife (MIT). '+
     'Тактические выводы сформированы ИИ на основе приведённой статистики и требуют проверки на корте.</p></div>';
   toast('Открываю печать — сохрани как PDF');
   setTimeout(function(){window.print()},420);

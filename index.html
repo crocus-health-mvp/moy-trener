@@ -631,7 +631,7 @@ var CONFIG = {
   MAIN_YEARS:[2026,2025,2024,2023,2022],
   ITF_YEARS:[2026,2025,2024],
   PRICE_SCOUT:4900,
-  VERSION:'v4 · прокси через воркер'
+  VERSION:'v5'
 };
 var KEY='moytrener.v2';
 
@@ -763,12 +763,14 @@ var DB={
         return Promise.resolve(null);
       }
       return fetch(f.urls[i],{cache:'default'}).then(function(r){
-        if(!r.ok)return tryUrls(f,i+1,r.status===404?'нет файла (404)':'ошибка '+r.status);
+        if(!r.ok)return tryUrls(f,i+1,(i===0?'воркер':'GitHub')+': '+r.status);
         return r.text().then(function(t){
           if(!t||t.length<80)return tryUrls(f,i+1,'пустой ответ');
           return {n:f.n,t:t,via:i===0?'воркер':'напрямую'};
         });
-      }).catch(function(){ return tryUrls(f,i+1,'сеть заблокирована') });
+      }).catch(function(){
+        return tryUrls(f,i+1,(i===0?'воркер':'GitHub')+' недоступен');
+      });
     };
 
     return Promise.all(files.map(function(f){

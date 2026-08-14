@@ -724,15 +724,24 @@ var DB={
   repo:function(){return S.tour==='w'?'tennis_wta':'tennis_atp'},
   pfx:function(){return S.tour==='w'?'wta':'atp'},
 
+  /* Основной путь — через собственный воркер: запрос к GitHub делает
+     Cloudflare, а не браузер, поэтому блокировки у провайдера не мешают.
+     Запасной — напрямую, если воркер недоступен. */
+  urls:function(name){
+    var direct=CONFIG.BASE+this.repo()+'/master/'+name;
+    var viaWorker=(CONFIG.API&&CONFIG.API.indexOf('http')===0)
+      ? CONFIG.API.replace(/\/+$/,'')+'/data?f='+encodeURIComponent(name) : null;
+    return viaWorker ? [viaWorker,direct] : [direct];
+  },
   files:function(){
     var f=[],self=this;
     CONFIG.MAIN_YEARS.forEach(function(y){
-      f.push({u:CONFIG.BASE+self.repo()+'/master/'+self.pfx()+'_matches_'+y+'.csv',
-              n:'Тур '+y});
+      var n=self.pfx()+'_matches_'+y+'.csv';
+      f.push({name:n,urls:self.urls(n),n:'Тур '+y});
     });
     CONFIG.ITF_YEARS.forEach(function(y){
-      f.push({u:CONFIG.BASE+self.repo()+'/master/'+self.pfx()+'_matches_qual_itf_'+y+'.csv',
-              n:'Квал./ITF '+y});
+      var n=self.pfx()+'_matches_qual_itf_'+y+'.csv';
+      f.push({name:n,urls:self.urls(n),n:'Квал./ITF '+y});
     });
     return f;
   },
@@ -747,22 +756,31 @@ var DB={
 
     var files=this.files(),done=0;
     this.log=[];
+    var tryUrls=function(f,i,lastWhy){
+      if(i>=f.urls.length){
+        self.log.push({n:f.n,ok:false,why:lastWhy||'недоступен'});
+        return Promise.resolve(null);
+      }
+      return fetch(f.urls[i],{cache:'force-cache'}).then(function(r){
+        if(!r.ok)return tryUrls(f,i+1,r.status===404?'нет файла (404)':'ошибка '+r.status);
+        return r.text().then(function(t){
+          if(!t||t.length<80)return tryUrls(f,i+1,'пустой ответ');
+          return {n:f.n,t:t,via:i===0?'воркер':'напрямую'};
+        });
+      }).catch(function(){ return tryUrls(f,i+1,'сеть заблокирована') });
+    };
+
     return Promise.all(files.map(function(f){
-      return fetch(f.u,{cache:'force-cache'}).then(function(r){
-        if(!r.ok){self.log.push({n:f.n,ok:false,why:'нет файла ('+r.status+')'});return null}
-        return r.text();
-      }).catch(function(e){
-        self.log.push({n:f.n,ok:false,why:'сеть'});return null;
-      }).then(function(t){
+      return tryUrls(f,0,null).then(function(x){
         done++;paintDbState(Math.round(done/files.length*100));
-        return t?{n:f.n,t:t}:null;
+        return x;
       });
     })).then(function(res){
       res.forEach(function(x){
         if(!x)return;
         var before=self.rows.length;
         self.ingest(x.t);
-        self.log.push({n:x.n,ok:true,cnt:self.rows.length-before});
+        self.log.push({n:x.n,ok:true,cnt:self.rows.length-before,via:x.via});
       });
       self.log.sort(function(a,b){return (b.ok?1:0)-(a.ok?1:0)});
       self.loadedTour=S.tour;
@@ -1031,7 +1049,7 @@ function dbLogHtml(){
   return '<div class="dblog">'+DB.log.map(function(x){
     return '<div class="dbrow"><span class="'+(x.ok?'ok':'no')+'">'+(x.ok?'✓':'—')+'</span>'+
       '<span class="nm">'+esc(x.n)+'</span><span class="vl">'+
-      (x.ok?x.cnt.toLocaleString('ru')+' матчей':esc(x.why))+'</span></div>';
+      (x.ok?x.cnt.toLocaleString('ru')+' матчей · '+esc(x.via||''):esc(x.why))+'</span></div>';
   }).join('')+'<div class="dbnote">Отсутствующие файлы — это нормально: '+
     'за текущий сезон они появляются по ходу года.</div></div>';
 }

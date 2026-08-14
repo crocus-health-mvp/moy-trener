@@ -631,7 +631,7 @@ var CONFIG = {
   MAIN_YEARS:[2026,2025,2024,2023,2022],
   ITF_YEARS:[2026,2025,2024],
   PRICE_SCOUT:4900,
-  VERSION:'v6'
+  VERSION:'v7'
 };
 var KEY='moytrener.v2';
 
@@ -767,7 +767,11 @@ var DB={
       return fetch(f.urls[i],{cache:'default'}).then(function(r){
         if(!r.ok){why.push(tag+' '+r.status);return tryUrls(f,i+1,why)}
         return r.text().then(function(t){
-          if(!t||t.length<80){why.push(tag+' пусто');return tryUrls(f,i+1,why)}
+          // настоящий файл всегда начинается с шапки колонок
+          if(!t||t.length<500||t.slice(0,200).indexOf('tourney_id')<0){
+            why.push(tag+' не CSV ('+(t?t.length:0)+')');
+            return tryUrls(f,i+1,why);
+          }
           return {n:f.n,t:t,via:tag};
         });
       }).catch(function(e){
@@ -1057,13 +1061,16 @@ function toggleLog(){logOpen=!logOpen;paintDbState()}
 function pingWorker(){
   var out=document.getElementById('ping-out');
   out.innerHTML='<div class="spin"></div>';
-  var u=CONFIG.API.replace(/\/+$/,'')+'/data?f=wta_matches_2024.csv';
+  var u=CONFIG.API.replace(/\/+$/,'')+'/data?f=wta_matches_2024.csv&fresh=1';
   fetch(u).then(function(r){
     return r.text().then(function(t){
-      out.innerHTML='<div class="note '+(r.ok?'fact':'soft')+'">'+
+      var real=t.length>500&&t.slice(0,200).indexOf('tourney_id')>-1;
+      out.innerHTML='<div class="note '+(real?'fact':'soft')+'">'+
         '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/></svg><span>'+
-        'Ответ воркера: <b>'+r.status+'</b><br>Получено символов: '+t.length+
-        '<br>Начало: '+esc(t.slice(0,90))+'</span></div>';
+        (real?'<b>Данные пришли.</b> ':'<b>Пришёл не CSV.</b> ')+
+        'Статус '+r.status+', символов '+t.length.toLocaleString('ru')+
+        ', источник '+esc(r.headers.get('X-Source')||'—')+
+        '<br><br>'+esc(t.slice(0,110))+'</span></div>';
     });
   }).catch(function(e){
     out.innerHTML='<div class="note soft">'+

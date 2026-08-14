@@ -631,7 +631,7 @@ var CONFIG = {
   MAIN_YEARS:[2026,2025,2024,2023,2022],
   ITF_YEARS:[2026,2025,2024],
   PRICE_SCOUT:4900,
-  VERSION:'v5'
+  VERSION:'v6'
 };
 var KEY='moytrener.v2';
 
@@ -757,19 +757,23 @@ var DB={
 
     var files=this.files(),done=0;
     this.log=[];
-    var tryUrls=function(f,i,lastWhy){
+    var tryUrls=function(f,i,why){
+      why=why||[];
+      var tag=(i===0?'воркер':'GitHub');
       if(i>=f.urls.length){
-        self.log.push({n:f.n,ok:false,why:lastWhy||'недоступен'});
+        self.log.push({n:f.n,ok:false,why:why.join(' · ')||'недоступен'});
         return Promise.resolve(null);
       }
       return fetch(f.urls[i],{cache:'default'}).then(function(r){
-        if(!r.ok)return tryUrls(f,i+1,(i===0?'воркер':'GitHub')+': '+r.status);
+        if(!r.ok){why.push(tag+' '+r.status);return tryUrls(f,i+1,why)}
         return r.text().then(function(t){
-          if(!t||t.length<80)return tryUrls(f,i+1,'пустой ответ');
-          return {n:f.n,t:t,via:i===0?'воркер':'напрямую'};
+          if(!t||t.length<80){why.push(tag+' пусто');return tryUrls(f,i+1,why)}
+          return {n:f.n,t:t,via:tag};
         });
-      }).catch(function(){
-        return tryUrls(f,i+1,(i===0?'воркер':'GitHub')+' недоступен');
+      }).catch(function(e){
+        // fetch падает при блокировке CORS или обрыве сети
+        why.push(tag+' ✕ '+String(e&&e.name||'err'));
+        return tryUrls(f,i+1,why);
       });
     };
 
@@ -1047,6 +1051,28 @@ function paintDbStateInner(p){
 
 var logOpen=false;
 function toggleLog(){logOpen=!logOpen;paintDbState()}
+
+/* Проверка связи с воркером — показывает точную ошибку,
+   включая блокировку CORS, которую fetch иначе прячет. */
+function pingWorker(){
+  var out=document.getElementById('ping-out');
+  out.innerHTML='<div class="spin"></div>';
+  var u=CONFIG.API.replace(/\/+$/,'')+'/data?f=wta_matches_2024.csv';
+  fetch(u).then(function(r){
+    return r.text().then(function(t){
+      out.innerHTML='<div class="note '+(r.ok?'fact':'soft')+'">'+
+        '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/></svg><span>'+
+        'Ответ воркера: <b>'+r.status+'</b><br>Получено символов: '+t.length+
+        '<br>Начало: '+esc(t.slice(0,90))+'</span></div>';
+    });
+  }).catch(function(e){
+    out.innerHTML='<div class="note soft">'+
+      '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/></svg><span>'+
+      'Запрос не прошёл: <b>'+esc(String(e&&e.name||'ошибка'))+'</b> — '+
+      esc(String(e&&e.message||''))+'<br><br>Если тут TypeError, а по прямой ссылке '+
+      'файл скачивается — значит блокируется браузером, а не сетью.</span></div>';
+  });
+}
 function dbLogHtml(){
   if(!logOpen||!DB.log.length)return '';
   return '<div class="dblog">'+DB.log.map(function(x){
@@ -1054,7 +1080,9 @@ function dbLogHtml(){
       '<span class="nm">'+esc(x.n)+'</span><span class="vl">'+
       (x.ok?x.cnt.toLocaleString('ru')+' матчей · '+esc(x.via||''):esc(x.why))+'</span></div>';
   }).join('')+'<div class="dbnote">Отсутствующие файлы — это нормально: '+
-    'за текущий сезон они появляются по ходу года.</div></div>';
+    'за текущий сезон они появляются по ходу года.</div></div>'+
+    '<button class="btn ghost" style="margin-bottom:10px" onclick="pingWorker()">Проверить связь с воркером</button>'+
+    '<div id="ping-out"></div>';
 }
 
 /* ═══ ГЛАВНАЯ ═══ */

@@ -319,6 +319,14 @@ svg.chc .dim{opacity:.05;pointer-events:none}
   border-radius:2px;padding:14px;margin-bottom:9px;width:100%;text-align:left}
 .chart-item .n{font-family:'Oswald',sans-serif;font-size:15px;margin-bottom:3px}
 .chart-item .d{font-size:11.5px;color:var(--dim-2)}
+.link-box{border:1px solid var(--edge-2);border-radius:2px;padding:18px;margin-bottom:14px}
+.link-h{font-family:'Oswald',sans-serif;font-size:15px;letter-spacing:.04em;margin-bottom:7px}
+.link-d{font-size:12.5px;color:var(--dim-2);line-height:1.5;margin-bottom:14px}
+.link-in{background:var(--court);border-radius:2px;padding:13px 15px;margin-bottom:11px}
+.link-in input{font-size:14px}
+.link-in input::placeholder{color:var(--dim-2)}
+.link-ili{text-align:center;font-size:11px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--dim-2);font-family:'Oswald',sans-serif;margin:16px 0 12px}
 .upload{border:1px dashed var(--edge-2);border-radius:2px;padding:26px 20px;
   text-align:center;margin-bottom:12px;transition:.15s}
 .upload:active{border-color:var(--ball);background:rgba(220,242,75,.04)}
@@ -638,7 +646,7 @@ var CONFIG = {
   BASE:'https://stats.tennismylife.org/data/',
   YEARS:[2026,2025,2024,2023,2022],
   PRICE_SCOUT:4900,
-  VERSION:'v9 · видео на Modal'
+  VERSION:'v10 · ссылки на облака'
 };
 var KEY='moytrener.v2';
 
@@ -1435,6 +1443,18 @@ function paintTraining(){
     (charts?'<div class="sec-title"><span class="eyebrow">Начатые</span></div>'+charts:'')+
 
     '<div class="sec-title"><span class="eyebrow">Своя игра</span></div>'+
+
+    '<div class="link-box">'+
+      '<div class="link-h">Ссылка на запись</div>'+
+      '<div class="link-d">Google Drive, Яндекс Диск, Dropbox. '+
+        'Открой доступ по ссылке — файл скачается на сервер напрямую, '+
+        'размер значения не имеет.</div>'+
+      '<div class="link-in"><input id="i-link" placeholder="Вставь ссылку" '+
+        'autocapitalize="off" autocorrect="off" spellcheck="false"></div>'+
+      '<button class="btn quiet" onclick="poSsylke()">Разобрать по ссылке</button>'+
+    '</div>'+
+
+    '<div class="link-ili">или загрузить файл</div>'+
     '<div class="upload" onclick="pickVideo()">'+
       '<div class="up-ic"><svg viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 16v3a1 1 0 001 1h14a1 1 0 001-1v-3"/></svg></div>'+
       '<div class="up-t">Загрузить видео тренировки</div>'+
@@ -1455,6 +1475,53 @@ function paintTraining(){
     (opts||'<div class="empty" style="padding:34px 20px"><div class="e-t">Нет разборов</div>'+
       '<p>Закажи разбор во вкладке «Анализ» — и здесь можно будет разобрать её сильные стороны.</p></div>')+
     '<div id="tactics-out"></div>';
+}
+
+function poSsylke(){
+  if(vidBusy){toast('Дождись окончания текущего разбора');return}
+  var el=document.getElementById('i-link');
+  var url=(el.value||'').trim();
+  if(!url){toast('Вставь ссылку на запись');return}
+
+  var zapis={
+    id:'v'+Date.now(),
+    name:url.replace(/^https?:\/\//,'').slice(0,44),
+    size:'по ссылке',
+    date:new Date().toLocaleDateString('ru',{day:'2-digit',month:'short'}),
+    status:'Скачиваю и разбираю…', pct:null
+  };
+  S.videos.unshift(zapis); S.videos=S.videos.slice(0,8);
+  el.value=''; save(); paintTraining();
+
+  vidBusy=true;
+  var stop=false;
+  var tik=setInterval(function(){
+    if(stop)return clearInterval(tik);
+    zapis.status = zapis.status.length>24 ? 'Скачиваю и разбираю' : zapis.status+'.';
+    paintTraining();
+  },1200);
+
+  fetch(CONFIG.VIDEO_API.replace(/\/+$/,'')+'/po-ssylke',{
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({url:url})
+  }).then(function(r){
+    return r.json().then(function(d){return {ok:r.ok,d:d}});
+  }).then(function(x){
+    stop=true; clearInterval(tik); vidBusy=false;
+    if(x.ok && x.d && !x.d.oshibka){
+      zapis.razbor=x.d; zapis.status='Готов';
+      if(x.d.istochnik)zapis.size=x.d.istochnik+(x.d.razmer_mb?' · '+x.d.razmer_mb+' МБ':'');
+      toast('Разбор готов: розыгрышей '+(x.d.itogo&&x.d.itogo.rozygryshey||0));
+    }else{
+      zapis.status='Ошибка';
+      zapis.oshibka=(x.d&&x.d.oshibka)||'не удалось разобрать';
+    }
+    save(); paintTraining();
+  }).catch(function(){
+    stop=true; clearInterval(tik); vidBusy=false;
+    zapis.status='Ошибка'; zapis.oshibka='Нет связи с сервером разбора';
+    save(); paintTraining();
+  });
 }
 
 function pickVideo(){
@@ -1554,7 +1621,8 @@ function openVideo(id){
   document.getElementById('rep-body').innerHTML=
     '<div class="note fact"><svg viewBox="0 0 24 24"><path d="M5 13l4.5 4.5L19 7"/></svg>'+
     '<span>Разобрано автоматически. '+(it.rozygryshey||0)+' розыгрышей из записи на '+
-    (r.dlitelnost_min||'—')+' мин.</span></div>'+
+    (r.dlitelnost_min||'—')+' мин.'+(r.istochnik?' Источник: '+esc(r.istochnik)+'.':'')+
+    '</span></div>'+
 
     '<div class="stat-grid">'+
     '<div class="st"><div class="v">'+(it.rozygryshey||'—')+'</div><div class="l">Розыгрышей</div></div>'+

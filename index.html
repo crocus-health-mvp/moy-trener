@@ -335,6 +335,12 @@ svg.chc .dim{opacity:.05;pointer-events:none}
 .vid-b{flex:1;min-width:0}
 .vid-b .t{font-size:14px;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .vid-b .d{font-size:11.5px;color:var(--dim-2)}
+.vid{transition:.14s}
+.vid:active{background:var(--court-2)}
+.vid.gotov .vid-ic svg{stroke:var(--ball)}
+.vid-b .d.plohо{color:var(--warn)}
+.vid-bar{height:3px;background:var(--court-2);border-radius:2px;margin-top:7px;overflow:hidden}
+.vid-bar i{display:block;height:100%;background:var(--ball);transition:width .2s}
 .vid-x{flex:0 0 30px;height:30px;display:flex;align-items:center;justify-content:center;opacity:.5}
 .vid-x svg{width:15px;height:15px;stroke:var(--line);fill:none;stroke-width:1.7}
 .dblog{border:1px solid var(--edge);border-radius:2px;margin-bottom:12px;overflow:hidden}
@@ -625,11 +631,14 @@ var CONFIG = {
   // Cloudflare Worker — прокси к Anthropic API (ключ хранится в воркере)
   API:'https://moy-trener-ai.zhcg2b4hg4.workers.dev',
   MODEL:'claude-sonnet-4-6',
+  // Modal: разбор видео на GPU
+  VIDEO_API:'https://naprikoletm602--moy-trener-web.modal.run',
+  VIDEO_MAX_MB:220,
   // Источник: TennisMyLife (MIT). Репозиторий Сакманна удалён в 2026.
   BASE:'https://stats.tennismylife.org/data/',
   YEARS:[2026,2025,2024,2023,2022],
   PRICE_SCOUT:4900,
-  VERSION:'v8 · TennisMyLife'
+  VERSION:'v9 · видео на Modal'
 };
 var KEY='moytrener.v2';
 
@@ -1383,11 +1392,22 @@ function paintTraining(){
   if(!box)return;
 
   var vids=S.videos.length ? S.videos.map(function(v,i){
-    return '<div class="vid">'+
-      '<div class="vid-ic"><svg viewBox="0 0 24 24"><path d="M4 6h11a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1V7a1 1 0 011-1z"/><path d="M16 10l5-3v10l-5-3"/></svg></div>'+
+    var gotov=!!v.razbor, plohо=(v.status==='Ошибка');
+    var podpis = gotov
+      ? (v.razbor.itogo&&v.razbor.itogo.rozygryshey||0)+' розыгрышей · открыть'
+      : plohо ? esc(v.oshibka||'ошибка')
+      : esc(v.status||'в очереди');
+    return '<div class="vid'+(gotov?' gotov':'')+'" onclick="openVideo(\''+attr(v.id)+'\')">'+
+      '<div class="vid-ic">'+(gotov
+        ? '<svg viewBox="0 0 24 24"><path d="M5 13l4.5 4.5L19 7"/></svg>'
+        : '<svg viewBox="0 0 24 24"><path d="M4 6h11a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1V7a1 1 0 011-1z"/><path d="M16 10l5-3v10l-5-3"/></svg>')+
+      '</div>'+
       '<div class="vid-b"><div class="t">'+esc(v.name)+'</div>'+
-      '<div class="d">'+v.size+' · '+esc(v.date)+' · в очереди на разбор</div></div>'+
-      '<button class="vid-x" onclick="dropVideo('+i+')">'+
+      '<div class="d'+(plohо?' plohо':'')+'">'+v.size+' · '+podpis+'</div>'+
+      (v.pct!=null&&v.pct<100&&!plohо
+        ? '<div class="vid-bar"><i style="width:'+v.pct+'%"></i></div>' : '')+
+      '</div>'+
+      '<button class="vid-x" onclick="event.stopPropagation();dropVideo('+i+')">'+
       '<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>';
   }).join('') : '';
 
@@ -1424,9 +1444,9 @@ function paintTraining(){
     (vids?'<div class="sec-title"><span class="eyebrow">Загруженные</span></div>'+vids:'')+
     '<div class="note soft" style="margin-top:14px">'+
       '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.01"/></svg>'+
-      '<span>Автоматический разбор видео — следующий этап: нужна отдельная система '+
-      'компьютерного зрения, которая размечает удары и траектории. Сейчас файл '+
-      'становится в очередь, разбор делает тренер вручную.</span></div>'+
+      '<span>Разбор автоматический: делит запись на розыгрыши, находит игроков, '+
+      'строит карту перемещений. До '+CONFIG.VIDEO_MAX_MB+' МБ, это примерно десять минут. '+
+      'Трекинг мяча и направления подач — следующий этап.</span></div>'+
 
     '<div class="sec-title"><span class="eyebrow">Взять у соперника</span></div>'+
     '<p style="color:var(--dim);font-size:13.5px;line-height:1.55;margin-bottom:14px">'+
@@ -1437,24 +1457,159 @@ function paintTraining(){
     '<div id="tactics-out"></div>';
 }
 
-function pickVideo(){document.getElementById('f-video').click()}
+function pickVideo(){
+  if(vidBusy){toast('Дождись окончания текущего разбора');return}
+  document.getElementById('f-video').click();
+}
+
+var vidBusy=false;
 
 function onVideo(inp){
   var f=inp.files&&inp.files[0];
+  inp.value='';
   if(!f)return;
+
   var mb=f.size/1048576;
-  S.videos.unshift({
+  if(mb>CONFIG.VIDEO_MAX_MB){
+    toast('Видео '+mb.toFixed(0)+' МБ — больше '+CONFIG.VIDEO_MAX_MB+
+          '. Обрежь до десяти минут.');
+    return;
+  }
+
+  var zapis={
+    id:'v'+Date.now(),
     name:f.name.length>40?f.name.slice(0,37)+'…':f.name,
     size: mb>=1 ? mb.toFixed(1)+' МБ' : Math.round(f.size/1024)+' КБ',
-    date: new Date().toLocaleDateString('ru',{day:'2-digit',month:'short'})
-  });
+    date: new Date().toLocaleDateString('ru',{day:'2-digit',month:'short'}),
+    status:'Отправляю…', pct:0
+  };
+  S.videos.unshift(zapis);
   S.videos=S.videos.slice(0,8);
   save();paintTraining();
-  toast('Видео принято. Разбор появится после проверки тренером');
-  inp.value='';
+
+  vidBusy=true;
+  var xhr=new XMLHttpRequest();
+  xhr.open('POST',CONFIG.VIDEO_API.replace(/\/+$/,'')+'/analiz');
+  xhr.setRequestHeader('Content-Type','application/octet-stream');
+  xhr.setRequestHeader('x-file-name',f.name.replace(/[^\w.\-]/g,'_'));
+  xhr.timeout=15*60*1000;
+
+  xhr.upload.onprogress=function(e){
+    if(!e.lengthComputable)return;
+    zapis.pct=Math.round(e.loaded/e.total*100);
+    zapis.status = zapis.pct<100 ? 'Загружаю '+zapis.pct+'%' : 'Разбираю…';
+    paintTraining();
+  };
+
+  xhr.onload=function(){
+    vidBusy=false;
+    var d=null;
+    try{d=JSON.parse(xhr.responseText)}catch(e){}
+    if(xhr.status===200 && d && !d.oshibka){
+      zapis.razbor=d; zapis.status='Готов'; zapis.pct=100;
+      toast('Разбор готов: розыгрышей '+(d.itogo&&d.itogo.rozygryshey||0));
+    }else{
+      zapis.status='Ошибка';
+      zapis.oshibka=(d&&(d.oshibka||d.detali))||('код '+xhr.status);
+    }
+    save();paintTraining();
+  };
+
+  xhr.onerror=function(){
+    vidBusy=false;zapis.status='Ошибка';
+    zapis.oshibka='Нет связи с сервером разбора';
+    save();paintTraining();
+  };
+  xhr.ontimeout=function(){
+    vidBusy=false;zapis.status='Ошибка';
+    zapis.oshibka='Слишком долго. Видео длинное — обрежь.';
+    save();paintTraining();
+  };
+
+  xhr.send(f);
 }
 
-function dropVideo(i){S.videos.splice(i,1);save();paintTraining()}
+function dropVideo(i){
+  if(vidBusy && i===0){toast('Идёт разбор, подожди');return}
+  S.videos.splice(i,1);save();paintTraining();
+}
+
+/* ── Экран разбора видео ── */
+function openVideo(id){
+  var v=null;
+  for(var i=0;i<S.videos.length;i++)if(S.videos[i].id===id)v=S.videos[i];
+  if(!v){toast('Не найдено');return}
+  if(!v.razbor){
+    toast(v.oshibka?('Ошибка: '+v.oshibka):('Статус: '+v.status));
+    return;
+  }
+  var r=v.razbor, it=r.itogo||{}, poz=r.pozicii||{};
+
+  var dl=(r.rozygryshi||[]).map(function(x){return x.dlit});
+  var top=(r.rozygryshi||[]).slice().sort(function(a,b){return b.dlit-a.dlit}).slice(0,8);
+
+  var mmss=function(s){return Math.floor(s/60)+':'+('0'+Math.floor(s%60)).slice(-2)};
+
+  document.getElementById('rep-title').textContent='Видео · '+v.name;
+  document.getElementById('rep-body').innerHTML=
+    '<div class="note fact"><svg viewBox="0 0 24 24"><path d="M5 13l4.5 4.5L19 7"/></svg>'+
+    '<span>Разобрано автоматически. '+(it.rozygryshey||0)+' розыгрышей из записи на '+
+    (r.dlitelnost_min||'—')+' мин.</span></div>'+
+
+    '<div class="stat-grid">'+
+    '<div class="st"><div class="v">'+(it.rozygryshey||'—')+'</div><div class="l">Розыгрышей</div></div>'+
+    '<div class="st"><div class="v mid">'+(it.srednyaya_dlina_sek||'—')+'</div>'+
+      '<div class="l">Средняя длина</div><div class="n">секунд</div></div>'+
+    '<div class="st"><div class="v mid">'+(it.samyy_dlinnyy_sek||'—')+'</div>'+
+      '<div class="l">Самый длинный</div><div class="n">секунд</div></div>'+
+    '<div class="st"><div class="v mid">'+(it.dolya_igry_pct!=null?it.dolya_igry_pct+'%':'—')+'</div>'+
+      '<div class="l">Доля игры</div><div class="n">от записи</div></div>'+
+    '</div>'+
+
+    (it.srednyaya_pauza_sek!=null
+      ? '<div class="bar-n" style="margin-bottom:14px">Средняя пауза между очками — '+
+        it.srednyaya_pauza_sek+' сек</div>' : '')+
+
+    (poz.dalniy||poz.blizhniy ? pozicionSVG(poz) : '')+
+
+    '<div class="sec-title"><span class="eyebrow">Самые длинные розыгрыши</span></div>'+
+    (top.length ? top.map(function(x,i){
+      return '<div class="mt"><div class="mt-r w">'+(i+1)+'</div>'+
+        '<div class="mt-b"><div class="o">'+mmss(x.ot)+' — '+mmss(x.do)+'</div>'+
+        '<div class="t">'+(x.tochki?x.tochki.length+' замеров позиций':'')+'</div></div>'+
+        '<div class="mt-s">'+x.dlit+' сек</div></div>';
+    }).join('') : '<div class="card"><p>Розыгрыши не выделились. Скорее всего съёмка нестабильная или слишком короткая.</p></div>')+
+
+    '<div class="credit">Разбор автоматический: деление на розыгрыши и позиции игроков. '+
+    'Трекинг мяча, направления подач и типы ударов — следующий этап.</div>';
+  openSheet('sh-rep');
+}
+
+/* Схема средних позиций из разбора видео */
+function pozicionSVG(poz){
+  var t=function(p,tsvet,podpis){
+    if(!p)return '';
+    var x=12+p.x*94, y=6+p.y*96;
+    var rx=Math.max(4,(p.razbros_x||0)*94), ry=Math.max(4,(p.razbros_y||0)*96);
+    return '<ellipse cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" rx="'+rx.toFixed(1)+
+      '" ry="'+ry.toFixed(1)+'" fill="'+tsvet+'" opacity=".18"/>'+
+      '<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="2.6" fill="'+tsvet+'"/>';
+  };
+  return '<div class="court-wrap"><div class="court-cap">Где стояли игроки</div>'+
+    '<svg class="court" viewBox="0 0 118 108">'+
+    t(poz.dalniy,'#DCF24B')+t(poz.blizhniy,'#FF7A45')+
+    '<rect class="ln" x="12" y="6" width="94" height="96"/>'+
+    '<line class="ln" x1="24" y1="6" x2="24" y2="102"/>'+
+    '<line class="ln" x1="94" y1="6" x2="94" y2="102"/>'+
+    '<line class="ln" x1="24" y1="40" x2="94" y2="40"/>'+
+    '<line class="ln" x1="24" y1="68" x2="94" y2="68"/>'+
+    '<line class="ln" x1="59" y1="40" x2="59" y2="68"/>'+
+    '<line class="net" x1="6" y1="54" x2="112" y2="54"/></svg>'+
+    '<div class="court-key">'+
+    '<i><b style="background:#DCF24B"></b>Дальний игрок</i>'+
+    '<i><b style="background:#FF7A45"></b>Ближний</i>'+
+    '<i style="color:var(--dim-2)">Овал — разброс перемещений</i></div></div>';
+}
 
 function copyTactics(key){
   var P=null;

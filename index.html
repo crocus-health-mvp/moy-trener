@@ -18,6 +18,7 @@
   --warn:#FF7A45;
   --edge:rgba(237,241,236,.10); --edge-2:rgba(237,241,236,.18);
   --safe-t:env(safe-area-inset-top,0px); --safe-b:env(safe-area-inset-bottom,0px);
+  --tabs-h:66px;   /* высота нижнего меню без учёта безопасной зоны */
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;overscroll-behavior:none}
@@ -39,7 +40,7 @@ a{color:var(--ball);text-decoration:none}
 .screen.on{display:flex}
 .scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;
   padding:calc(var(--safe-t) + 14px) 20px 24px}
-.pad-tabs{padding-bottom:96px}
+.pad-tabs{padding-bottom:calc(var(--tabs-h) + var(--safe-b) + 24px)}
 #s-splash .scroll{display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center}
 .splash-court{width:170px;margin-bottom:32px;opacity:0;animation:fin .8s .1s forwards}
 @keyframes fin{to{opacity:1}}
@@ -194,13 +195,14 @@ svg.court .lbl.mel{font-size:7.5px;letter-spacing:0}
 .note.fact svg{stroke:var(--ball)}
 .note.soft{background:rgba(143,163,184,.07);border:1px solid var(--edge-2);color:var(--dim)}
 .note.soft svg{stroke:var(--dim)}
-.pane-wrap{position:relative;flex:1 1 auto;min-height:0}
+.pane-wrap{position:relative;flex:1 1 auto;min-height:0;
+  margin-bottom:calc(var(--tabs-h) + var(--safe-b))}
 .pane-scroll{position:absolute;top:0;left:0;right:0;bottom:0;display:none;
-  overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px 20px 96px}
+  overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px 20px 24px}
 #pane-chat{position:absolute;top:0;left:0;right:0;bottom:0;display:none}
 #pane-chat.on{display:block}
 .chat{position:absolute;top:0;left:0;right:0;bottom:0;overflow-y:auto;
-  -webkit-overflow-scrolling:touch;padding:18px 20px 96px}
+  -webkit-overflow-scrolling:touch;padding:18px 20px 84px}
 .msg{margin-bottom:16px;display:flex;gap:11px;align-items:flex-start}
 .msg.me{justify-content:flex-end}
 .bub{max-width:80%;padding:13px 16px;border-radius:2px 14px 14px 14px;background:var(--court);
@@ -220,8 +222,7 @@ svg.court .lbl.mel{font-size:7.5px;letter-spacing:0}
   padding:9px 15px;border-radius:2px}
 .diag-btn button:active{color:var(--ball);border-color:var(--ball)}
 .composer{position:absolute;left:0;right:0;bottom:0;z-index:10;
-  display:flex;gap:10px;align-items:flex-end;
-  padding:12px 16px calc(var(--safe-b) + 12px);
+  display:flex;gap:10px;align-items:flex-end;padding:12px 16px;
   border-top:1px solid var(--edge);background:var(--ground)}
 .composer .box{flex:1;background:var(--court);border-radius:2px;padding:13px 15px}
 .composer textarea{resize:none;max-height:96px;font-size:15px;line-height:1.45}
@@ -692,7 +693,7 @@ var CONFIG = {
   BASE:'https://stats.tennismylife.org/data/',
   YEARS:[2026,2025,2024,2023,2022],
   PRICE_SCOUT:4900,
-  VERSION:'v19 · корт'
+  VERSION:'v20 · корт и чат'
 };
 var KEY='moytrener.v2';
 
@@ -1699,6 +1700,12 @@ function dropVideo(i){
    ═══════════════════════════════════════════════════ */
 
 var MOM_VID = null;
+var MOM_KLIPY = {};      // номер розыгрыша → есть ли нарезка
+var MOM_RAZBOR = null;   // id разбора на сервере
+
+function klipURL(n){
+  return CONFIG.VIDEO_API.replace(/\/+$/,'')+'/klip/'+MOM_RAZBOR+'/'+n;
+}
 
 function otkrytMomenty(id){
   var v=null;
@@ -1712,10 +1719,21 @@ function otkrytMomenty(id){
 
   document.getElementById('mom-title').textContent='Моменты · '+v.name;
 
+  // Клипы, нарезанные на сервере. Работают одинаково и для файла,
+  // и для ссылки — в отличие от блоба, который есть только у файла.
+  var klipy={}; var estKlipy=false;
+  if(r.razbor_id && r.klipy && r.klipy.length){
+    for(var q=0;q<r.klipy.length;q++)klipy[r.klipy[q].n]=true;
+    estKlipy=true;
+  }
+  MOM_KLIPY=klipy; MOM_RAZBOR=r.razbor_id||null;
+
   var est=BLOBY[v.id];
-  document.getElementById('mom-player').innerHTML = est
-    ? '<video id="mom-video" class="mom-video" controls playsinline preload="metadata" '+
-      'src="'+est+'"></video>'
+  document.getElementById('mom-player').innerHTML = (estKlipy||est)
+    ? '<video id="mom-video" class="mom-video" controls playsinline preload="metadata"'+
+      (est&&!estKlipy?' src="'+est+'"':'')+'></video>'+
+      (estKlipy?'<div class="bar-n" style="padding:8px 2px 0">'+
+        'Тапни момент — откроется отдельный клип этого розыгрыша.</div>':'')
     : '<div class="mom-zaglushka">'+
       '<svg viewBox="0 0 24 24"><path d="M4 6h11a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1V7a1 1 0 011-1z"/>'+
       '<path d="M16 10l5-3v10l-5-3"/></svg>'+
@@ -1749,14 +1767,17 @@ function otkrytMomenty(id){
   document.getElementById('mom-body').innerHTML=
     '<div class="note soft" style="margin-bottom:14px">'+
     '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.01"/></svg>'+
-    '<span>'+(est?'Тапни момент — видео перемотается на нужную секунду.'
-                 :'Тапни момент, чтобы скопировать время.')+'</span></div>'+
+    '<span>'+(estKlipy?'Нарезано '+r.klipy.length+' клипов. Каждый — один розыгрыш.'
+                 :(est?'Тапни момент — видео перемотается на нужную секунду.'
+                      :'Тапни момент, чтобы скопировать время.'))+'</span></div>'+
     pomechennye.map(function(p){
-      var x=p.x;
-      return '<button class="mom" onclick="k_momentu('+x.ot+')">'+
+      var x=p.x, i=p.nomer-1;
+      var estK=MOM_KLIPY[i]===true;
+      return '<button class="mom" onclick="k_momentu('+x.ot+','+i+')">'+
         '<div class="mom-t">'+mmss(x.ot)+'</div>'+
         '<div class="mom-b">'+
-          '<div class="mom-h">Розыгрыш '+p.nomer+' · '+x.dlit+' сек</div>'+
+          '<div class="mom-h">Розыгрыш '+p.nomer+' · '+x.dlit+' сек'+
+          (estK?' · клип':'')+'</div>'+
           (p.metki.length
             ? '<div class="mom-m">'+p.metki.map(function(m){
                 return '<span class="mm">'+esc(m)+'</span>'}).join('')+'</div>'
@@ -1766,14 +1787,25 @@ function otkrytMomenty(id){
       '</button>';
     }).join('')+
     '<div class="credit">Моменты отобраны автоматически по длительности, '+
-    'направлению подачи и темпу. Отдельная нарезка файлов появится позже.</div>';
+    'направлению подачи и темпу.'+
+    (estKlipy?' Клипы хранятся двое суток.':'')+'</div>';
 
   openSheet('sh-mom');
 }
 
-function k_momentu(sek){
+function k_momentu(sek,i){
   var vid=document.getElementById('mom-video');
-  if(vid){
+
+  // Есть нарезка на сервере — грузим отдельный клип
+  if(vid && MOM_RAZBOR && MOM_KLIPY[i]===true){
+    vid.src=klipURL(i);
+    vid.load();
+    vid.play().catch(function(){});
+    vid.scrollIntoView({block:'start',behavior:'smooth'});
+    return;
+  }
+
+  if(vid && vid.src){
     vid.currentTime=Math.max(0,sek-1.5);
     vid.play().catch(function(){});
     vid.scrollIntoView({block:'start',behavior:'smooth'});
@@ -1803,14 +1835,27 @@ function openVideo(id){
   var dl=(r.rozygryshi||[]).map(function(x){return x.dlit});
   var top=(r.rozygryshi||[]).slice().sort(function(a,b){return b.dlit-a.dlit}).slice(0,8);
 
+  var det=r.detekciya||{};
+  var nadezhno=(det.dolya_pct!=null && det.dolya_pct>=50);
+
   var mmss=function(s){return Math.floor(s/60)+':'+('0'+Math.floor(s%60)).slice(-2)};
 
   document.getElementById('rep-title').textContent='Видео · '+v.name;
   document.getElementById('rep-body').innerHTML=
-    '<div class="note fact"><svg viewBox="0 0 24 24"><path d="M5 13l4.5 4.5L19 7"/></svg>'+
-    '<span>Разобрано автоматически. '+(it.rozygryshey||0)+' розыгрышей из записи на '+
+    verdikt(r)+
+
+    '<div class="bar-n" style="margin-bottom:16px">Разобрано автоматически: '+
+    (it.rozygryshey||0)+' розыгрышей из записи на '+
     (r.dlitelnost_min||'—')+' мин.'+(r.istochnik?' Источник: '+esc(r.istochnik)+'.':'')+
-    '</span></div>'+
+    (r.klipy&&r.klipy.length?' Нарезано клипов: '+r.klipy.length+'.':'')+
+    '</div>'+
+
+    // Клипы — главная ценность разбора, поэтому кнопка стоит первой,
+    // а не в середине среди графиков.
+    '<button class="btn" style="width:100%;margin-bottom:18px" onclick="otkrytMomenty(\''+
+      attr(v.id)+'\')">'+
+      (r.klipy&&r.klipy.length?'Смотреть моменты · '+r.klipy.length+' клипов'
+                              :'Смотреть моменты')+'</button>'+
 
     '<div class="stat-grid">'+
     '<div class="st"><div class="v">'+(it.rozygryshey||'—')+'</div><div class="l">Розыгрышей</div></div>'+
@@ -1826,21 +1871,18 @@ function openVideo(id){
       ? '<div class="bar-n" style="margin-bottom:14px">Средняя пауза между очками — '+
         it.srednyaya_pauza_sek+' сек</div>' : '')+
 
-    (poz.dalniy||poz.blizhniy ? pozicionSVG(poz) :
-      '<div class="note soft"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/>'+
-      '<path d="M12 8v5M12 16.5v.01"/></svg><span>Игроков в кадре найти не удалось. '+
-      'Обычно так бывает при съёмке издалека или если корт занимает малую часть кадра.'+
-      '</span></div>')+
-
-    (r.detekciya ? '<div class="bar-n" style="margin:-6px 0 16px">'+
-      'Игроки распознаны в '+r.detekciya.dolya_pct+'% кадров ('+
-      r.detekciya.kadrov_s_igrokami+' из '+r.detekciya.kadrov_prosmotreno+')</div>' : '')+
+    // Позиции показываем только если распознавание было устойчивым.
+    // На 40% кадров средняя точка ничего не значит — лучше промолчать,
+    // чем нарисовать карту, которой нельзя верить.
+    (nadezhno && (poz.dalniy||poz.blizhniy)
+      ? pozicionSVG(poz)+
+        '<div class="bar-n" style="margin:-6px 0 16px">Игроки распознаны в '+
+        det.dolya_pct+'% кадров ('+det.kadrov_s_igrokami+' из '+
+        det.kadrov_prosmotreno+')</div>'
+      : '<div class="bar-n" style="margin-bottom:16px">Позиции игроков не показываем: '+
+        'распознавание было неустойчивым. Сними корт спереди и целиком.</div>')+
 
     myachBlok(r)+
-
-    '<div class="sec-title"><span class="eyebrow">Моменты</span></div>'+
-    '<button class="btn ghost" style="margin-bottom:14px" onclick="otkrytMomenty(\''+
-      attr(v.id)+'\')">Смотреть моменты</button>'+
 
     '<div class="sec-title"><span class="eyebrow">Самые длинные розыгрыши</span></div>'+
     (top.length ? top.map(function(x,i){
@@ -1860,6 +1902,63 @@ function openVideo(id){
 
 /* Мяч: направления подачи и отскоки.
    Появляется, только если TrackNet отработал.            */
+/* ═══════════════════════════════════════════════════
+   ВЕРДИКТ
+   Одна мысль до всех графиков. Человек должен понять,
+   что происходит, не листая двенадцать секций.
+   ═══════════════════════════════════════════════════ */
+
+function verdikt(r){
+  var it=r.itogo||{}, m=r.myach;
+  var n=it.rozygryshey||0;
+  if(!n) return '';
+
+  var sred=it.srednyaya_dlina_sek, pauza=it.srednyaya_pauza_sek;
+  var glavnoe='', sovet='';
+
+  // Характер игры по длине розыгрыша
+  if(sred!=null && sred<7){
+    glavnoe='Очки заканчиваются быстро — в среднем '+sred+' сек.';
+    sovet='Игра идёт на первых ударах. Смотри, кто ошибается раньше.';
+  }else if(sred!=null && sred>16){
+    glavnoe='Длинные обмены — в среднем '+sred+' сек.';
+    sovet='Розыгрыши затяжные: важна выносливость и терпение в размене.';
+  }else if(sred!=null){
+    glavnoe='Средний розыгрыш '+sred+' сек — обычный рабочий темп.';
+    sovet='';
+  }
+
+  // Паузы между очками
+  if(pauza!=null && pauza>20){
+    sovet='Между очками уходит '+pauza+' сек — это много. '+
+          'На матче такой темп собьёт ритм.';
+  }
+
+  // Перекос подачи
+  if(m && m.napravleniya_pct){
+    var p=m.napravleniya_pct;
+    var maks=null, kuda=null;
+    ['levo','centr','pravo'].forEach(function(k){
+      if(p[k]!=null && (maks===null||p[k]>maks)){maks=p[k];kuda=k}
+    });
+    var NAZV={levo:'влево',centr:'в центр',pravo:'вправо'};
+    if(maks!=null && maks>=60 && m.rozygryshey_s_myachom>=4){
+      sovet='Подача уходит '+NAZV[kuda]+' в '+maks+'% случаев — '+
+            'соперник это читает. Разнообразь направление.';
+    }
+  }
+
+  if(!glavnoe) return '';
+
+  var malo = n<6;
+  return '<div class="note fact" style="margin-bottom:14px">'+
+    '<svg viewBox="0 0 24 24"><path d="M5 13l4.5 4.5L19 7"/></svg>'+
+    '<span><b>'+esc(glavnoe)+'</b>'+
+    (sovet?' '+esc(sovet):'')+
+    (malo?' Розыгрышей мало ('+n+') — для устойчивых выводов нужна запись подлиннее.':'')+
+    '</span></div>';
+}
+
 function myachBlok(r){
   var m=r.myach, st=r.myach_status;
 
@@ -1911,13 +2010,7 @@ function myachBlok(r){
     (st&&st.dolya_pct!=null?' Мяч виден в '+st.dolya_pct+'% кадров.':'')+
     (m.v_metrah?' Корт распознан — координаты в метрах.':'')+
     '</span></div>'+
-    (r.kort && !r.kort.dostupno
-      ? '<div class="note soft"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/>'+
-        '<path d="M12 8v5M12 16.5v.01"/></svg><span>Корт не распознан: '+
-        esc(r.kort.prichina||'')+'. Числа считаются по кадру, а не по площадке.'+
-        '</span></div>'
-      : '')+
-    podachaSVG(pc)+
+    (m.v_metrah?podachaSVG(pc):'')+
     zona('levo','Влево')+
     zona('centr','В центр')+
     zona('pravo','Вправо')+
@@ -1932,7 +2025,7 @@ function myachBlok(r){
       ? '<div class="bar-n" style="margin-top:-4px">Отброшено как ошибки трекера: '+
         m.otbrosheno_vne_korta+' точек за пределами корта</div>' : '')+
 
-    (m.zony_otskoka && m.tochek_otskoka>=4
+    (m.zony_otskoka && m.tochek_otskoka>=4 && m.v_metrah
       ? '<div class="sec-title"><span class="eyebrow">'+
         (m.v_metrah?'Куда падает мяч':'Где мяч меняет направление')+' · '+
         sklon(m.tochek_otskoka,'касание','касания','касаний',m.v_metrah)+'</span></div>'+

@@ -646,7 +646,7 @@ var CONFIG = {
   BASE:'https://stats.tennismylife.org/data/',
   YEARS:[2026,2025,2024,2023,2022],
   PRICE_SCOUT:4900,
-  VERSION:'v12 · детекция игроков'
+  VERSION:'v13 · трекинг мяча'
 };
 var KEY='moytrener.v2';
 
@@ -1681,17 +1681,88 @@ function openVideo(id){
       'Игроки распознаны в '+r.detekciya.dolya_pct+'% кадров ('+
       r.detekciya.kadrov_s_igrokami+' из '+r.detekciya.kadrov_prosmotreno+')</div>' : '')+
 
+    myachBlok(r)+
+
     '<div class="sec-title"><span class="eyebrow">Самые длинные розыгрыши</span></div>'+
     (top.length ? top.map(function(x,i){
       return '<div class="mt"><div class="mt-r w">'+(i+1)+'</div>'+
         '<div class="mt-b"><div class="o">'+mmss(x.ot)+' — '+mmss(x.do)+'</div>'+
-        '<div class="t">'+(x.tochki?x.tochki.length+' замеров позиций':'')+'</div></div>'+
+        '<div class="t">'+(x.tochki?x.tochki.length+' замеров':'')+
+        (x.podacha?' · подача '+({levo:'влево',centr:'в центр',pravo:'вправо'}[x.podacha]||''):'')+
+        (x.otskokov?' · отскоков '+x.otskokov:'')+'</div></div>'+
         '<div class="mt-s">'+x.dlit+' сек</div></div>';
     }).join('') : '<div class="card"><p>Розыгрыши не выделились. Скорее всего съёмка нестабильная или слишком короткая.</p></div>')+
 
     '<div class="credit">Разбор автоматический: деление на розыгрыши и позиции игроков. '+
     'Трекинг мяча, направления подач и типы ударов — следующий этап.</div>';
   openSheet('sh-rep');
+}
+
+/* Мяч: направления подачи и отскоки.
+   Появляется, только если TrackNet отработал.            */
+function myachBlok(r){
+  var m=r.myach, st=r.myach_status;
+
+  if(!m){
+    var prichina = st && st.prichina ? st.prichina : 'не запускался';
+    return '<div class="sec-title"><span class="eyebrow">Мяч</span></div>'+
+      '<div class="note soft"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/>'+
+      '<path d="M12 8v5M12 16.5v.01"/></svg><span>Трекинг мяча не отработал: '+
+      esc(prichina)+'</span></div>';
+  }
+
+  var n=m.napravleniya||{}, pc=m.napravleniya_pct||{};
+  var vsego=(n.levo||0)+(n.centr||0)+(n.pravo||0);
+
+  if(!vsego){
+    return '<div class="sec-title"><span class="eyebrow">Мяч</span></div>'+
+      '<div class="note soft"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/>'+
+      '<path d="M12 8v5M12 16.5v.01"/></svg><span>Мяч найден, но траекторий '+
+      'не хватило для выводов. Обычно так на коротких или размытых записях.</span></div>';
+  }
+
+  var zona=function(imya,klyuch,podpis){
+    var d=pc[klyuch], k=n[klyuch]||0;
+    return '<div class="bar"><div class="bar-h"><span class="k">'+podpis+'</span>'+
+      '<span class="v">'+(d!=null?d+'%':'—')+'</span></div>'+
+      '<div class="bar-t"><i style="width:'+Math.max(2,d||0)+'%"></i></div>'+
+      '<div class="bar-n">'+k+' из '+vsego+'</div></div>';
+  };
+
+  return '<div class="sec-title"><span class="eyebrow">Мяч · куда идёт подача</span></div>'+
+    '<div class="note fact"><svg viewBox="0 0 24 24"><path d="M5 13l4.5 4.5L19 7"/></svg>'+
+    '<span>Траектория отслежена в '+m.rozygryshey_s_myachom+' розыгрышах. '+
+    'Отскоков найдено: '+m.otskokov_vsego+'.</span></div>'+
+    podachaSVG(pc)+
+    zona('levo','levo','Влево')+
+    zona('centr','centr','В центр')+
+    zona('pravo','pravo','Вправо')+
+    '<div class="bar-n" style="margin-bottom:6px">Направление считается по '+
+    'первым кадрам розыгрыша — куда ушёл мяч после подачи.</div>';
+}
+
+/* Схема корта с подсветкой зон подачи */
+function podachaSVG(pc){
+  var zony=[
+    {k:'levo', x:24, w:23, p:'Влево'},
+    {k:'centr',x:49, w:22, p:'В центр'},
+    {k:'pravo',x:73, w:22, p:'Вправо'}
+  ].map(function(z){
+    var d=pc[z.k]||0;
+    var a=(0.10+Math.min(d,100)/100*0.70).toFixed(2);
+    return '<rect x="'+z.x+'" y="14" width="'+z.w+'" height="26" fill="#DCF24B" opacity="'+a+'"/>'+
+      '<text class="lbl" x="'+(z.x+z.w/2)+'" y="30" text-anchor="middle">'+
+      (d?d+'%':'—')+'</text>';
+  }).join('');
+  return '<div class="court-wrap"><div class="court-cap">Зоны подачи</div>'+
+    '<svg class="court" viewBox="0 0 118 108">'+zony+
+    '<rect class="ln" x="12" y="6" width="94" height="96"/>'+
+    '<line class="ln" x1="24" y1="6" x2="24" y2="102"/>'+
+    '<line class="ln" x1="94" y1="6" x2="94" y2="102"/>'+
+    '<line class="ln" x1="24" y1="40" x2="94" y2="40"/>'+
+    '<line class="ln" x1="24" y1="68" x2="94" y2="68"/>'+
+    '<line class="ln" x1="59" y1="40" x2="59" y2="68"/>'+
+    '<line class="net" x1="6" y1="54" x2="112" y2="54"/></svg></div>';
 }
 
 /* Схема средних позиций из разбора видео */

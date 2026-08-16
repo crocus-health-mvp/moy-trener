@@ -623,6 +623,13 @@ svg.chc .dim{opacity:.05;pointer-events:none}
   <div class="scroll" id="mom-body"></div>
 </section>
 
+<section class="sheet" id="sh-kal">
+  <div class="sheet-hdr"><button class="x" onclick="closeSheet('sh-kal')">
+    <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <h3>Разметка корта</h3></div>
+  <div class="scroll" id="kal-body"></div>
+</section>
+
 <section class="sheet" id="sh-edit">
   <div class="sheet-hdr"><button class="x" onclick="closeSheet('sh-edit')">
     <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
@@ -1702,6 +1709,7 @@ function dropVideo(i){
 var MOM_VID = null;
 var MOM_KLIPY = {};      // номер розыгрыша → есть ли нарезка
 var MOM_RAZBOR = null;   // id разбора на сервере
+var MOM_TEK_ID = null;   // id открытой записи — для кнопки разметки
 
 function klipURL(n){
   return CONFIG.VIDEO_API.replace(/\/+$/,'')+'/klip/'+MOM_RAZBOR+'/'+n;
@@ -1837,6 +1845,7 @@ function openVideo(id){
 
   var det=r.detekciya||{};
   var nadezhno=(det.dolya_pct!=null && det.dolya_pct>=50);
+  MOM_TEK_ID=v.id;
 
   var mmss=function(s){return Math.floor(s/60)+':'+('0'+Math.floor(s%60)).slice(-2)};
 
@@ -1959,6 +1968,152 @@ function verdikt(r){
     '</span></div>';
 }
 
+/* ═══════════════════════════════════════════════════
+   РУЧНАЯ РАЗМЕТКА КОРТА
+   Сеть находит площадку не всегда: солнце, тени,
+   выцветшие линии. Четыре тапа решают это за секунды
+   и без единой GPU-секунды — пересчитывается только
+   геометрия, видео заново не трогается.
+   ═══════════════════════════════════════════════════ */
+
+var KAL={id:null,video:null,tochki:[],img:null};
+var KAL_UGLY=[
+  {k:'lv',n:'Дальний левый угол'},
+  {k:'pv',n:'Дальний правый угол'},
+  {k:'pn',n:'Ближний правый угол'},
+  {k:'ln',n:'Ближний левый угол'}
+];
+
+function otkrytKalibrovku(id){
+  var v=null;
+  for(var i=0;i<S.videos.length;i++)if(S.videos[i].id===id)v=S.videos[i];
+  if(!v||!v.razbor||!v.razbor.razbor_id){toast('Кадр недоступен');return}
+
+  KAL={id:v.razbor.razbor_id,video:v,tochki:[],img:null};
+
+  document.getElementById('kal-body').innerHTML=
+    '<div class="note soft"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/>'+
+    '<path d="M12 8v5M12 16.5v.01"/></svg><span>Отметь четыре угла площадки — '+
+    'по внешним линиям одиночного корта. Порядок подскажу.</span></div>'+
+    '<div id="kal-shag" class="sec-title"><span class="eyebrow">'+
+    KAL_UGLY[0].n+'</span></div>'+
+    '<canvas id="kal-c" style="width:100%;border-radius:12px;'+
+    'background:#0b1220;display:block;touch-action:manipulation"></canvas>'+
+    '<div id="kal-hint" class="bar-n" style="margin-top:8px">Загружаю кадр…</div>'+
+    '<div style="display:flex;gap:10px;margin-top:14px">'+
+    '<button class="btn ghost" style="flex:1" onclick="kalNazad()">Назад</button>'+
+    '<button class="btn" style="flex:1" id="kal-ok" onclick="kalOtpravit()" '+
+    'disabled>Готово</button></div>';
+
+  openSheet('sh-kal');
+
+  var img=new Image();
+  img.crossOrigin='anonymous';
+  img.onload=function(){
+    KAL.img=img;
+    var c=document.getElementById('kal-c');
+    if(!c)return;
+    c.width=img.width; c.height=img.height;
+    c.onclick=kalTap;
+    kalRisovat();
+    document.getElementById('kal-hint').textContent=
+      'Тапни по кадру. Промахнулся — жми «Назад».';
+  };
+  img.onerror=function(){
+    var h=document.getElementById('kal-hint');
+    if(h)h.textContent='Кадр не загрузился. Возможно, срок хранения истёк.';
+  };
+  img.src=CONFIG.VIDEO_API.replace(/\/+$/,'')+'/kadr/'+KAL.id;
+}
+
+function kalTap(e){
+  if(KAL.tochki.length>=4)return;
+  var c=e.target, r=c.getBoundingClientRect();
+  // из экранных координат в доли кадра
+  var x=(e.clientX-r.left)/r.width;
+  var y=(e.clientY-r.top)/r.height;
+  KAL.tochki.push([Math.min(1,Math.max(0,x)),Math.min(1,Math.max(0,y))]);
+  kalRisovat();
+}
+
+function kalNazad(){
+  KAL.tochki.pop();
+  kalRisovat();
+}
+
+function kalRisovat(){
+  var c=document.getElementById('kal-c');
+  if(!c||!KAL.img)return;
+  var g=c.getContext('2d');
+  g.drawImage(KAL.img,0,0,c.width,c.height);
+
+  var R=Math.max(8,c.width*0.012);
+  // соединяем отмеченное, чтобы было видно форму
+  if(KAL.tochki.length>1){
+    g.strokeStyle='#d7f24a'; g.lineWidth=Math.max(2,c.width*0.004);
+    g.beginPath();
+    KAL.tochki.forEach(function(p,i){
+      var X=p[0]*c.width, Y=p[1]*c.height;
+      if(i===0)g.moveTo(X,Y);else g.lineTo(X,Y);
+    });
+    if(KAL.tochki.length===4)g.closePath();
+    g.stroke();
+  }
+  KAL.tochki.forEach(function(p,i){
+    var X=p[0]*c.width, Y=p[1]*c.height;
+    g.fillStyle='#d7f24a'; g.beginPath(); g.arc(X,Y,R,0,7); g.fill();
+    g.fillStyle='#0b1220';
+    g.font='bold '+Math.round(R*1.3)+'px sans-serif';
+    g.textAlign='center'; g.textBaseline='middle';
+    g.fillText(String(i+1),X,Y);
+  });
+
+  var shag=document.getElementById('kal-shag');
+  var ok=document.getElementById('kal-ok');
+  if(KAL.tochki.length<4){
+    shag.innerHTML='<span class="eyebrow">'+KAL_UGLY[KAL.tochki.length].n+'</span>';
+    if(ok)ok.disabled=true;
+  }else{
+    shag.innerHTML='<span class="eyebrow">Все четыре отмечены</span>';
+    if(ok)ok.disabled=false;
+  }
+}
+
+function kalOtpravit(){
+  if(KAL.tochki.length!==4)return;
+  var u={};
+  KAL_UGLY.forEach(function(a,i){u[a.k]=KAL.tochki[i]});
+
+  var ok=document.getElementById('kal-ok');
+  ok.disabled=true; ok.textContent='Считаю…';
+
+  fetch(CONFIG.VIDEO_API.replace(/\/+$/,'')+'/perekalibrovat',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({razbor_id:KAL.id,uglyi:u})
+  })
+  .then(function(r){return r.json()})
+  .then(function(d){
+    ok.textContent='Готово';
+    if(d.oshibka){ok.disabled=false;toast(d.oshibka);return}
+
+    // Вклеиваем пересчитанное в разбор и перерисовываем
+    var r=KAL.video.razbor;
+    r.myach=d.myach;
+    r.kort=d.kort;
+    if(d.rozygryshi)r.rozygryshi=d.rozygryshi;
+    save();
+
+    closeSheet('sh-kal');
+    toast('Корт размечен — схемы пересчитаны');
+    openVideo(KAL.video.id);
+  })
+  .catch(function(){
+    ok.disabled=false; ok.textContent='Готово';
+    toast('Не дозвонился до сервера');
+  });
+}
+
 function myachBlok(r){
   var m=r.myach, st=r.myach_status;
 
@@ -2010,7 +2165,14 @@ function myachBlok(r){
     (st&&st.dolya_pct!=null?' Мяч виден в '+st.dolya_pct+'% кадров.':'')+
     (m.v_metrah?' Корт распознан — координаты в метрах.':'')+
     '</span></div>'+
-    (m.v_metrah?podachaSVG(pc):'')+
+    (m.v_metrah?podachaSVG(pc):
+      (r.razbor_id
+        ? '<div class="bar-n" style="margin-bottom:8px">Схемы корта не показываем: '+
+          'площадка не распозналась автоматически.</div>'+
+          '<button class="btn ghost" style="width:100%;margin-bottom:14px" '+
+          'onclick="otkrytKalibrovku(\''+attr(MOM_TEK_ID||'')+'\')">'+
+          'Разметить корт вручную · 4 тапа</button>'
+        : ''))+
     zona('levo','Влево')+
     zona('centr','В центр')+
     zona('pravo','Вправо')+

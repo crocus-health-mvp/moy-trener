@@ -646,7 +646,7 @@ var CONFIG = {
   BASE:'https://stats.tennismylife.org/data/',
   YEARS:[2026,2025,2024,2023,2022],
   PRICE_SCOUT:4900,
-  VERSION:'v10 · ссылки на облака'
+  VERSION:'v11 · фоновая обработка'
 };
 var KEY='moytrener.v2';
 
@@ -1477,6 +1477,44 @@ function paintTraining(){
     '<div id="tactics-out"></div>';
 }
 
+/* Обработка идёт в фоне на сервере: спрашиваем готовность
+   каждые пять секунд, пока не ответит.                     */
+function zhdatRazbor(nomer, zapis, nachalo){
+  nachalo = nachalo || Date.now();
+  var proshlo = Math.round((Date.now()-nachalo)/1000);
+
+  if(proshlo > 25*60){
+    vidBusy=false; zapis.status='Ошибка';
+    zapis.oshibka='Слишком долго. Видео очень длинное — попробуй короче.';
+    save(); paintTraining(); return;
+  }
+
+  zapis.status = 'Разбираю · ' + (proshlo<60
+    ? proshlo+' сек'
+    : Math.floor(proshlo/60)+' мин '+(proshlo%60)+' сек');
+  paintTraining();
+
+  fetch(CONFIG.VIDEO_API.replace(/\/+$/,'')+'/status/'+encodeURIComponent(nomer))
+  .then(function(r){return r.json()})
+  .then(function(d){
+    if(!d.gotovo){ setTimeout(function(){zhdatRazbor(nomer,zapis,nachalo)},5000); return }
+    vidBusy=false;
+    if(d.oshibka){
+      zapis.status='Ошибка'; zapis.oshibka=d.oshibka;
+    }else{
+      zapis.razbor=d.razbor; zapis.status='Готов';
+      var r=d.razbor||{};
+      if(r.istochnik)zapis.size=r.istochnik+(r.razmer_mb?' · '+r.razmer_mb+' МБ':'');
+      toast('Разбор готов: розыгрышей '+((r.itogo&&r.itogo.rozygryshey)||0));
+    }
+    save(); paintTraining();
+  })
+  .catch(function(){
+    // сеть могла моргнуть — пробуем ещё
+    setTimeout(function(){zhdatRazbor(nomer,zapis,nachalo)},7000);
+  });
+}
+
 function poSsylke(){
   if(vidBusy){toast('Дождись окончания текущего разбора');return}
   var el=document.getElementById('i-link');
@@ -1494,12 +1532,6 @@ function poSsylke(){
   el.value=''; save(); paintTraining();
 
   vidBusy=true;
-  var stop=false;
-  var tik=setInterval(function(){
-    if(stop)return clearInterval(tik);
-    zapis.status = zapis.status.length>24 ? 'Скачиваю и разбираю' : zapis.status+'.';
-    paintTraining();
-  },1200);
 
   fetch(CONFIG.VIDEO_API.replace(/\/+$/,'')+'/po-ssylke',{
     method:'POST', headers:{'Content-Type':'application/json'},
@@ -1507,18 +1539,18 @@ function poSsylke(){
   }).then(function(r){
     return r.json().then(function(d){return {ok:r.ok,d:d}});
   }).then(function(x){
-    stop=true; clearInterval(tik); vidBusy=false;
-    if(x.ok && x.d && !x.d.oshibka){
-      zapis.razbor=x.d; zapis.status='Готов';
-      if(x.d.istochnik)zapis.size=x.d.istochnik+(x.d.razmer_mb?' · '+x.d.razmer_mb+' МБ':'');
-      toast('Разбор готов: розыгрышей '+(x.d.itogo&&x.d.itogo.rozygryshey||0));
+    if(x.ok && x.d && x.d.nomer){
+      if(x.d.istochnik)zapis.size=x.d.istochnik;
+      save();
+      zhdatRazbor(x.d.nomer, zapis);
     }else{
+      vidBusy=false;
       zapis.status='Ошибка';
-      zapis.oshibka=(x.d&&x.d.oshibka)||'не удалось разобрать';
+      zapis.oshibka=(x.d&&x.d.oshibka)||'не удалось запустить разбор';
+      save(); paintTraining();
     }
-    save(); paintTraining();
   }).catch(function(){
-    stop=true; clearInterval(tik); vidBusy=false;
+    vidBusy=false;
     zapis.status='Ошибка'; zapis.oshibka='Нет связи с сервером разбора';
     save(); paintTraining();
   });
@@ -1569,17 +1601,18 @@ function onVideo(inp){
   };
 
   xhr.onload=function(){
-    vidBusy=false;
     var d=null;
     try{d=JSON.parse(xhr.responseText)}catch(e){}
-    if(xhr.status===200 && d && !d.oshibka){
-      zapis.razbor=d; zapis.status='Готов'; zapis.pct=100;
-      toast('Разбор готов: розыгрышей '+(d.itogo&&d.itogo.rozygryshey||0));
+    if(xhr.status===200 && d && d.nomer){
+      zapis.pct=100;
+      save();
+      zhdatRazbor(d.nomer, zapis);   // ждём фоновую обработку
     }else{
+      vidBusy=false;
       zapis.status='Ошибка';
       zapis.oshibka=(d&&(d.oshibka||d.detali))||('код '+xhr.status);
+      save();paintTraining();
     }
-    save();paintTraining();
   };
 
   xhr.onerror=function(){

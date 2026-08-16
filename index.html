@@ -2000,6 +2000,7 @@ function otkrytKalibrovku(id){
     '<canvas id="kal-c" style="width:100%;border-radius:12px;'+
     'background:#0b1220;display:block;touch-action:manipulation"></canvas>'+
     '<div id="kal-hint" class="bar-n" style="margin-top:8px">Загружаю кадр…</div>'+
+    '<div class="bar-n" style="margin-top:4px;opacity:.6">id: '+attr(KAL.id)+'</div>'+
     '<div style="display:flex;gap:10px;margin-top:14px">'+
     '<button class="btn ghost" style="flex:1" onclick="kalNazad()">Назад</button>'+
     '<button class="btn" style="flex:1" id="kal-ok" onclick="kalOtpravit()" '+
@@ -2008,7 +2009,9 @@ function otkrytKalibrovku(id){
   openSheet('sh-kal');
 
   var img=new Image();
-  img.crossOrigin='anonymous';
+  // crossOrigin не ставим: кадр только рисуется на канвасе,
+  // пиксели обратно не читаются. Лишнее требование к CORS
+  // — лишняя причина, по которой картинка не загрузится.
   img.onload=function(){
     KAL.img=img;
     var c=document.getElementById('kal-c');

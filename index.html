@@ -646,7 +646,7 @@ var CONFIG = {
   BASE:'https://stats.tennismylife.org/data/',
   YEARS:[2026,2025,2024,2023,2022],
   PRICE_SCOUT:4900,
-  VERSION:'v11 · фоновая обработка'
+  VERSION:'v12 · детекция игроков'
 };
 var KEY='moytrener.v2';
 
@@ -1671,7 +1671,15 @@ function openVideo(id){
       ? '<div class="bar-n" style="margin-bottom:14px">Средняя пауза между очками — '+
         it.srednyaya_pauza_sek+' сек</div>' : '')+
 
-    (poz.dalniy||poz.blizhniy ? pozicionSVG(poz) : '')+
+    (poz.dalniy||poz.blizhniy ? pozicionSVG(poz) :
+      '<div class="note soft"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/>'+
+      '<path d="M12 8v5M12 16.5v.01"/></svg><span>Игроков в кадре найти не удалось. '+
+      'Обычно так бывает при съёмке издалека или если корт занимает малую часть кадра.'+
+      '</span></div>')+
+
+    (r.detekciya ? '<div class="bar-n" style="margin:-6px 0 16px">'+
+      'Игроки распознаны в '+r.detekciya.dolya_pct+'% кадров ('+
+      r.detekciya.kadrov_s_igrokami+' из '+r.detekciya.kadrov_prosmotreno+')</div>' : '')+
 
     '<div class="sec-title"><span class="eyebrow">Самые длинные розыгрыши</span></div>'+
     (top.length ? top.map(function(x,i){

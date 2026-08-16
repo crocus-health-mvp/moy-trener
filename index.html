@@ -355,6 +355,22 @@ svg.chc .dim{opacity:.05;pointer-events:none}
 .vid-b{flex:1;min-width:0}
 .vid-b .t{font-size:14px;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .vid-b .d{font-size:11.5px;color:var(--dim-2)}
+.mom-video{width:100%;max-height:34vh;background:#000;display:block}
+.mom-zaglushka{padding:26px 20px;text-align:center;border-bottom:1px solid var(--edge)}
+.mom-zaglushka svg{width:26px;height:26px;stroke:var(--dim-2);fill:none;stroke-width:1.5;margin-bottom:10px}
+.mz-t{font-family:'Oswald',sans-serif;font-size:14px;margin-bottom:6px}
+.mz-d{font-size:12.5px;color:var(--dim-2);line-height:1.55;max-width:330px;margin:0 auto}
+.mom{display:flex;gap:13px;align-items:center;width:100%;text-align:left;
+  background:var(--court);border-radius:2px;padding:14px;margin-bottom:9px;transition:.14s}
+.mom:active{background:var(--court-2)}
+.mom-t{flex:0 0 46px;font-family:'Oswald',sans-serif;font-size:15px;color:var(--ball)}
+.mom-b{flex:1;min-width:0}
+.mom-h{font-size:14px;margin-bottom:5px}
+.mom-m{display:flex;flex-wrap:wrap;gap:5px}
+.mm{font-size:10.5px;color:var(--dim-2);border:1px solid var(--edge-2);
+  padding:3px 7px;border-radius:2px}
+.mom-p{flex:0 0 26px;height:26px;display:flex;align-items:center;justify-content:center}
+.mom-p svg{width:13px;height:13px;fill:var(--dim-2)}
 .vid{transition:.14s}
 .vid:active{background:var(--court-2)}
 .vid.gotov .vid-ic svg{stroke:var(--ball)}
@@ -588,6 +604,15 @@ svg.chc .dim{opacity:.05;pointer-events:none}
   </div>
 </section>
 
+<!-- ═══ ЛИСТ: МОМЕНТЫ ═══ -->
+<section class="sheet" id="sh-mom">
+  <div class="sheet-hdr"><button class="x" onclick="zakrytMomenty()">
+    <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <h3 id="mom-title">Моменты</h3></div>
+  <div id="mom-player"></div>
+  <div class="scroll" id="mom-body"></div>
+</section>
+
 <section class="sheet" id="sh-edit">
   <div class="sheet-hdr"><button class="x" onclick="closeSheet('sh-edit')">
     <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
@@ -658,7 +683,7 @@ var CONFIG = {
   BASE:'https://stats.tennismylife.org/data/',
   YEARS:[2026,2025,2024,2023,2022],
   PRICE_SCOUT:4900,
-  VERSION:'v17 · высота экрана'
+  VERSION:'v18 · моменты'
 };
 var KEY='moytrener.v2';
 
@@ -1574,6 +1599,7 @@ function pickVideo(){
 }
 
 var vidBusy=false;
+var BLOBY={};   // id видео → ссылка на файл в памяти
 
 function onVideo(inp){
   var f=inp.files&&inp.files[0];
@@ -1596,6 +1622,9 @@ function onVideo(inp){
   };
   S.videos.unshift(zapis);
   S.videos=S.videos.slice(0,8);
+  // ссылка на локальный файл живёт только в этой сессии,
+  // в хранилище её класть нельзя — она станет недействительной
+  BLOBY[zapis.id]=URL.createObjectURL(f);
   save();paintTraining();
 
   vidBusy=true;
@@ -1647,6 +1676,107 @@ function dropVideo(i){
 }
 
 /* ── Экран разбора видео ── */
+
+/* ═══════════════════════════════════════════════════
+   МОМЕНТЫ
+   Розыгрыши с осмысленными подписями и таймкодами.
+   Если видео загружали файлом — играет прямо здесь.
+   Если по ссылке — файл лежит в облаке, браузер его
+   не пустит, поэтому показываем время для перемотки.
+   ═══════════════════════════════════════════════════ */
+
+var MOM_VID = null;
+
+function otkrytMomenty(id){
+  var v=null;
+  for(var i=0;i<S.videos.length;i++)if(S.videos[i].id===id)v=S.videos[i];
+  if(!v||!v.razbor){toast('Разбор не найден');return}
+  MOM_VID=v;
+
+  var r=v.razbor;
+  var spisok=(r.rozygryshi||[]).slice();
+  if(!spisok.length){toast('Розыгрышей не нашлось');return}
+
+  document.getElementById('mom-title').textContent='Моменты · '+v.name;
+
+  var est=BLOBY[v.id];
+  document.getElementById('mom-player').innerHTML = est
+    ? '<video id="mom-video" class="mom-video" controls playsinline preload="metadata" '+
+      'src="'+est+'"></video>'
+    : '<div class="mom-zaglushka">'+
+      '<svg viewBox="0 0 24 24"><path d="M4 6h11a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1V7a1 1 0 011-1z"/>'+
+      '<path d="M16 10l5-3v10l-5-3"/></svg>'+
+      '<div class="mz-t">Видео здесь не проигрывается</div>'+
+      '<div class="mz-d">Запись пришла по ссылке и лежит в облаке — браузер '+
+      'не даёт её открыть отсюда. Открой файл в Диске и перемотай на нужное время.</div>'+
+      '</div>';
+
+  // ── Подписи: чем этот момент интересен ──
+  var dliny=spisok.map(function(x){return x.dlit});
+  var maks=Math.max.apply(null,dliny);
+  var sred=dliny.reduce(function(a,b){return a+b},0)/dliny.length;
+  var NAPR={levo:'подача влево',centr:'подача в центр',pravo:'подача вправо'};
+
+  var pomechennye=spisok.map(function(x,i){
+    var metki=[];
+    if(x.dlit===maks)metki.push('самый длинный');
+    else if(x.dlit>sred*1.4)metki.push('длинный розыгрыш');
+    else if(x.dlit<sred*0.6)metki.push('короткое очко');
+    if(x.podacha)metki.push(NAPR[x.podacha]);
+    if(x.skorost_maks&&x.skorost_maks>7)metki.push('быстрый темп');
+    if(x.tochki&&x.tochki.length>=8)metki.push('игроки видны хорошо');
+    return {x:x, nomer:i+1, metki:metki};
+  });
+
+  // сначала самые интересные
+  pomechennye.sort(function(a,b){return b.x.dlit-a.x.dlit});
+
+  var mmss=function(s){return Math.floor(s/60)+':'+('0'+Math.floor(s%60)).slice(-2)};
+
+  document.getElementById('mom-body').innerHTML=
+    '<div class="note soft" style="margin-bottom:14px">'+
+    '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.01"/></svg>'+
+    '<span>'+(est?'Тапни момент — видео перемотается на нужную секунду.'
+                 :'Тапни момент, чтобы скопировать время.')+'</span></div>'+
+    pomechennye.map(function(p){
+      var x=p.x;
+      return '<button class="mom" onclick="k_momentu('+x.ot+')">'+
+        '<div class="mom-t">'+mmss(x.ot)+'</div>'+
+        '<div class="mom-b">'+
+          '<div class="mom-h">Розыгрыш '+p.nomer+' · '+x.dlit+' сек</div>'+
+          (p.metki.length
+            ? '<div class="mom-m">'+p.metki.map(function(m){
+                return '<span class="mm">'+esc(m)+'</span>'}).join('')+'</div>'
+            : '')+
+        '</div>'+
+        '<div class="mom-p"><svg viewBox="0 0 24 24"><path d="M7 4l12 8-12 8z"/></svg></div>'+
+      '</button>';
+    }).join('')+
+    '<div class="credit">Моменты отобраны автоматически по длительности, '+
+    'направлению подачи и темпу. Отдельная нарезка файлов появится позже.</div>';
+
+  openSheet('sh-mom');
+}
+
+function k_momentu(sek){
+  var vid=document.getElementById('mom-video');
+  if(vid){
+    vid.currentTime=Math.max(0,sek-1.5);
+    vid.play().catch(function(){});
+    vid.scrollIntoView({block:'start',behavior:'smooth'});
+  }else{
+    var m=Math.floor(sek/60)+':'+('0'+Math.floor(sek%60)).slice(-2);
+    toast('Перемотай на '+m);
+  }
+}
+
+function zakrytMomenty(){
+  var vid=document.getElementById('mom-video');
+  if(vid){try{vid.pause()}catch(e){}}
+  document.getElementById('mom-player').innerHTML='';
+  closeSheet('sh-mom');
+}
+
 function openVideo(id){
   var v=null;
   for(var i=0;i<S.videos.length;i++)if(S.videos[i].id===id)v=S.videos[i];
@@ -1694,6 +1824,10 @@ function openVideo(id){
       r.detekciya.kadrov_s_igrokami+' из '+r.detekciya.kadrov_prosmotreno+')</div>' : '')+
 
     myachBlok(r)+
+
+    '<div class="sec-title"><span class="eyebrow">Моменты</span></div>'+
+    '<button class="btn ghost" style="margin-bottom:14px" onclick="otkrytMomenty(\''+
+      attr(v.id)+'\')">Смотреть моменты</button>'+
 
     '<div class="sec-title"><span class="eyebrow">Самые длинные розыгрыши</span></div>'+
     (top.length ? top.map(function(x,i){

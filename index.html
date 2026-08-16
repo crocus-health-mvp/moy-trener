@@ -203,6 +203,13 @@ svg.court .lbl{font-family:'Oswald',sans-serif;font-size:9px;fill:var(--ground);
 .typing i:nth-child(2){animation-delay:.16s}
 .typing i:nth-child(3){animation-delay:.32s}
 @keyframes tp{0%,60%,100%{opacity:.25;transform:translateY(0)}30%{opacity:1;transform:translateY(-4px)}}
+.diag{padding:10px 20px;font-size:12.5px;line-height:1.5}
+.diag.ok{color:var(--ball)}
+.diag.plohо{color:var(--warn)}
+.diag-btn{padding:0 20px 8px}
+.diag-btn button{font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--dim-2);border:1px solid var(--edge-2);
+  padding:8px 14px;border-radius:2px}
 .composer{display:flex;gap:10px;align-items:flex-end;
   padding:12px 16px calc(var(--safe-b) + 12px);border-top:1px solid var(--edge);background:var(--ground)}
 .composer .box{flex:1;background:var(--court);border-radius:2px;padding:13px 15px}
@@ -491,6 +498,7 @@ svg.chc .dim{opacity:.05;pointer-events:none}
   </div>
   <div id="pane-chat" style="flex:1;display:flex;flex-direction:column;min-height:0">
     <div class="chat" id="chat"></div>
+    <div id="ai-diag"></div>
     <div class="composer">
       <div class="box"><textarea id="i-chat" rows="1" placeholder="Спроси про подготовку…"
         oninput="grow(this)" onkeydown="chatKey(event)"></textarea></div>
@@ -646,7 +654,7 @@ var CONFIG = {
   BASE:'https://stats.tennismylife.org/data/',
   YEARS:[2026,2025,2024,2023,2022],
   PRICE_SCOUT:4900,
-  VERSION:'v13 · трекинг мяча'
+  VERSION:'v14 · мяч и диагностика ИИ'
 };
 var KEY='moytrener.v2';
 
@@ -1689,7 +1697,8 @@ function openVideo(id){
         '<div class="mt-b"><div class="o">'+mmss(x.ot)+' — '+mmss(x.do)+'</div>'+
         '<div class="t">'+(x.tochki?x.tochki.length+' замеров':'')+
         (x.podacha?' · подача '+({levo:'влево',centr:'в центр',pravo:'вправо'}[x.podacha]||''):'')+
-        (x.otskokov?' · отскоков '+x.otskokov:'')+'</div></div>'+
+        (x.otskokov?' · касаний '+x.otskokov:'')+
+        (x.skorost_maks?' · темп '+x.skorost_maks:'')+'</div></div>'+
         '<div class="mt-s">'+x.dlit+' сек</div></div>';
     }).join('') : '<div class="card"><p>Розыгрыши не выделились. Скорее всего съёмка нестабильная или слишком короткая.</p></div>')+
 
@@ -1715,13 +1724,16 @@ function myachBlok(r){
   var vsego=(n.levo||0)+(n.centr||0)+(n.pravo||0);
 
   if(!vsego){
+    var dop = st && st.dolya_pct!=null
+      ? ' Мяч найден в '+st.dolya_pct+'% кадров ('+(st.kadrov_s_myachom||0)+
+        ' из '+(st.kadrov||0)+').' : '';
     return '<div class="sec-title"><span class="eyebrow">Мяч</span></div>'+
       '<div class="note soft"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/>'+
-      '<path d="M12 8v5M12 16.5v.01"/></svg><span>Мяч найден, но траекторий '+
-      'не хватило для выводов. Обычно так на коротких или размытых записях.</span></div>';
+      '<path d="M12 8v5M12 16.5v.01"/></svg><span>Траекторий не хватило для выводов.'+
+      dop+'</span></div>';
   }
 
-  var zona=function(imya,klyuch,podpis){
+  var zona=function(klyuch,podpis){
     var d=pc[klyuch], k=n[klyuch]||0;
     return '<div class="bar"><div class="bar-h"><span class="k">'+podpis+'</span>'+
       '<span class="v">'+(d!=null?d+'%':'—')+'</span></div>'+
@@ -1729,16 +1741,67 @@ function myachBlok(r){
       '<div class="bar-n">'+k+' из '+vsego+'</div></div>';
   };
 
+  var chisla =
+    '<div class="stat-grid" style="margin-top:2px">'+
+    '<div class="st"><div class="v">'+(m.otskokov_na_rozygrysh!=null?m.otskokov_na_rozygrysh:'—')+'</div>'+
+      '<div class="l">Касаний за розыгрыш</div><div class="n">в среднем</div></div>'+
+    '<div class="st"><div class="v mid">'+(m.udarov_sredne!=null?m.udarov_sredne:'—')+'</div>'+
+      '<div class="l">Ударов в розыгрыше</div><div class="n">оценка</div></div>'+
+    '<div class="st"><div class="v mid">'+(m.skorost_srednyaya!=null?m.skorost_srednyaya:'—')+'</div>'+
+      '<div class="l">Средний темп</div><div class="n">долей кадра в сек</div></div>'+
+    '<div class="st"><div class="v mid">'+(m.skorost_maks!=null?m.skorost_maks:'—')+'</div>'+
+      '<div class="l">Максимальный</div><div class="n">самый быстрый мяч</div></div>'+
+    '</div>';
+
   return '<div class="sec-title"><span class="eyebrow">Мяч · куда идёт подача</span></div>'+
     '<div class="note fact"><svg viewBox="0 0 24 24"><path d="M5 13l4.5 4.5L19 7"/></svg>'+
     '<span>Траектория отслежена в '+m.rozygryshey_s_myachom+' розыгрышах. '+
-    'Отскоков найдено: '+m.otskokov_vsego+'.</span></div>'+
+    'Касаний покрытия найдено: '+m.otskokov_vsego+'.'+
+    (st&&st.dolya_pct!=null?' Мяч виден в '+st.dolya_pct+'% кадров.':'')+
+    '</span></div>'+
     podachaSVG(pc)+
-    zona('levo','levo','Влево')+
-    zona('centr','centr','В центр')+
-    zona('pravo','pravo','Вправо')+
-    '<div class="bar-n" style="margin-bottom:6px">Направление считается по '+
-    'первым кадрам розыгрыша — куда ушёл мяч после подачи.</div>';
+    zona('levo','Влево')+
+    zona('centr','В центр')+
+    zona('pravo','Вправо')+
+    '<div class="bar-n" style="margin-bottom:14px">Направление считается по первому '+
+    'касанию покрытия после подачи.</div>'+
+
+    '<div class="sec-title"><span class="eyebrow">Темп игры</span></div>'+
+    chisla+
+
+    (m.zony_otskoka && m.tochek_otskoka>=4
+      ? '<div class="sec-title"><span class="eyebrow">Куда падает мяч · '+
+        m.tochek_otskoka+' касаний</span></div>'+zonySVG(m.zony_otskoka,m.tochek_otskoka)
+      : '');
+}
+
+/* Тепловая карта касаний: корт разбит на девять зон */
+function zonySVG(setka,vsego){
+  var kletki='';
+  var shirina=[24,49,73], vysota=[10,42,72];
+  var wZ=[23,22,22], hZ=[30,28,28];
+  for(var ky=0;ky<3;ky++){
+    for(var kx=0;kx<3;kx++){
+      var k=setka[ky][kx]||0;
+      var dolya=vsego?k/vsego:0;
+      var a=(0.06+Math.min(dolya*2.2,1)*0.70).toFixed(2);
+      kletki+='<rect x="'+shirina[kx]+'" y="'+vysota[ky]+'" width="'+wZ[kx]+
+        '" height="'+hZ[ky]+'" fill="#DCF24B" opacity="'+a+'"/>'+
+        (k?'<text class="lbl" x="'+(shirina[kx]+wZ[kx]/2)+'" y="'+(vysota[ky]+hZ[ky]/2+3)+
+           '" text-anchor="middle">'+k+'</text>':'');
+    }
+  }
+  return '<div class="court-wrap"><div class="court-cap">Касания покрытия по зонам</div>'+
+    '<svg class="court" viewBox="0 0 118 108">'+kletki+
+    '<rect class="ln" x="12" y="6" width="94" height="96"/>'+
+    '<line class="ln" x1="24" y1="6" x2="24" y2="102"/>'+
+    '<line class="ln" x1="94" y1="6" x2="94" y2="102"/>'+
+    '<line class="ln" x1="24" y1="40" x2="94" y2="40"/>'+
+    '<line class="ln" x1="24" y1="68" x2="94" y2="68"/>'+
+    '<line class="ln" x1="59" y1="40" x2="59" y2="68"/>'+
+    '<line class="net" x1="6" y1="54" x2="112" y2="54"/></svg>'+
+    '<div class="court-key"><i style="color:var(--dim-2)">'+
+    'Ярче — чаще падает мяч. Числа — сколько касаний в зоне.</i></div></div>';
 }
 
 /* Схема корта с подсветкой зон подачи */
@@ -2254,9 +2317,36 @@ function bubble(text,me){
   d.querySelector('.bub').textContent=text;
   c.appendChild(d);c.scrollTop=c.scrollHeight;return d;
 }
+/* Проверка связи с ИИ — показывает точную причину молчания */
+function pingAI(){
+  var box=document.getElementById('ai-diag');
+  box.innerHTML='<div class="diag"><div class="spin"></div></div>';
+  if(!apiReady()){
+    box.innerHTML='<div class="diag plohо">В CONFIG.API не указан адрес воркера</div>';
+    return;
+  }
+  fetch(CONFIG.API,{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({model:CONFIG.MODEL,max_tokens:16,
+      messages:[{role:'user',content:'скажи: работает'}]})})
+  .then(function(r){return r.text().then(function(t){return {s:r.status,ok:r.ok,t:t}})})
+  .then(function(x){
+    if(x.ok){
+      box.innerHTML='<div class="diag ok">ИИ отвечает. Статус '+x.s+'</div>';
+      setTimeout(function(){box.innerHTML=''},4000);
+    }else{
+      box.innerHTML='<div class="diag plohо">Статус '+x.s+' · '+esc(x.t.slice(0,150))+'</div>';
+    }
+  })
+  .catch(function(e){
+    box.innerHTML='<div class="diag plohо">Воркер недоступен: '+esc(String(e&&e.name||''))+'</div>';
+  });
+}
+
 function initChat(){
   document.getElementById('chat').innerHTML='';
-  bubble(S.name+', я на связи.\n\nЗакажи разбор во вкладке «Анализ» — и здесь разберём соперницу подробно: как строить геймы, что делать на её подаче, где забирать брейк.',false);
+  bubble(S.name+', я на связи.\n\nЗакажи разбор во вкладке «Анализ» — и здесь разберём соперницу подробно: как строить геймы, что делать на её подаче, где забирать брейк.\n\nЕсли не отвечаю — нажми «Проверить ИИ» под этим сообщением.',false);
+  document.getElementById('ai-diag').innerHTML=
+    '<div class="diag-btn"><button onclick="pingAI()">Проверить ИИ</button></div>';
 }
 function askAbout(){
   closeSheet('sh-rep');tab('s-coach');segTo('chat');
@@ -2292,23 +2382,46 @@ function sendMsg(){
     'Игрок: '+S.name+', '+S.age+' лет, уровень '+S.lvl+', '+S.hand+' рука, '+S.bh+' бэкхенд.\n'+ctx+'\n'+
     'КРИТИЧЕСКОЕ ПРАВИЛО: опирайся только на приведённые числа. НИКОГДА не выдумывай статистику, которой нет — направления подач, типы ударов, поведение в конкретных счётах тебе НЕИЗВЕСТНЫ. Если спрашивают о том, чего нет в данных, честно скажи это и предложи, что можно понять из имеющихся чисел.';
 
-  var finish=function(out){
-    if(!out)out=localReply();
+  var finish=function(out,pochemu){
+    if(!out){
+      out=localReply();
+      if(pochemu)out+='\n\n⚠ '+pochemu;
+    }
     wait.remove();bubble(out,false);
     S.chat.push({role:'assistant',content:out});save();
     document.getElementById('b-send').disabled=false;
   };
 
-  if(!apiReady()){setTimeout(function(){finish(null)},350);return}
+  if(!apiReady()){
+    setTimeout(function(){finish(null,'ИИ не подключён: в CONFIG.API не указан адрес воркера.')},350);
+    return;
+  }
 
   fetch(CONFIG.API,{method:'POST',headers:{'Content-Type':'application/json'},
     body:JSON.stringify({model:CONFIG.MODEL,max_tokens:1000,system:sys,
       messages:S.chat.slice(-8)})})
-  .then(function(r){return r.ok?r.json():null})
-  .then(function(d){
-    finish(d?(d.content||[]).map(function(i){return i.text||''}).join('').trim():null);
+  .then(function(r){
+    return r.text().then(function(t){
+      var d=null; try{d=JSON.parse(t)}catch(e){}
+      if(!r.ok){
+        var opis = d && (d.error && (d.error.message||d.error.type) || d.oshibka) || t.slice(0,140);
+        var chelovechno =
+          r.status===401 ? 'Ключ Anthropic не принят. Проверь секрет в воркере.' :
+          r.status===429 ? 'Слишком часто или закончились кредиты на API.' :
+          r.status===400 && /credit|balance/i.test(String(opis))
+                         ? 'Закончились кредиты на console.anthropic.com.' :
+          r.status===403 ? 'Домен не в белом списке воркера.' :
+          ('Ответ '+r.status+': '+opis);
+        return finish(null, chelovechno);
+      }
+      var out=d?(d.content||[]).map(function(i){return i.text||''}).join('').trim():'';
+      finish(out||null, out?null:'Модель вернула пустой ответ.');
+    });
   })
-  .catch(function(){finish(null)});
+  .catch(function(e){
+    finish(null,'Запрос не прошёл: '+String(e&&e.name||'ошибка')+
+                '. Обычно это значит, что воркер недоступен.');
+  });
 }
 
 /* ═══ СТАРТ ═══ */

@@ -182,6 +182,7 @@ svg.court{width:100%;display:block}
 svg.court .ln{stroke:var(--line);stroke-width:1;fill:none;opacity:.42}
 svg.court .net{stroke:var(--line);stroke-width:1.8;opacity:.75}
 svg.court .lbl{font-family:'Oswald',sans-serif;font-size:9px;fill:var(--ground);letter-spacing:.06em}
+svg.court .lbl.mel{font-size:7.5px;letter-spacing:0}
 .court-key{display:flex;gap:16px;margin-top:14px;flex-wrap:wrap}
 .court-key i{display:flex;align-items:center;gap:7px;font-size:11.5px;color:var(--dim);font-style:normal}
 .court-key b{width:11px;height:11px;border-radius:1px;display:block}
@@ -203,14 +204,15 @@ svg.court .lbl{font-family:'Oswald',sans-serif;font-size:9px;fill:var(--ground);
 .typing i:nth-child(2){animation-delay:.16s}
 .typing i:nth-child(3){animation-delay:.32s}
 @keyframes tp{0%,60%,100%{opacity:.25;transform:translateY(0)}30%{opacity:1;transform:translateY(-4px)}}
-.diag{padding:10px 20px;font-size:12.5px;line-height:1.5}
+.diag{font-size:12.5px;line-height:1.5;margin-top:9px}
 .diag.ok{color:var(--ball)}
 .diag.plohо{color:var(--warn)}
-.diag-btn{padding:0 20px 8px}
+.diag-btn{padding:4px 0 10px}
 .diag-btn button{font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:.14em;
   text-transform:uppercase;color:var(--dim-2);border:1px solid var(--edge-2);
-  padding:8px 14px;border-radius:2px}
-.composer{display:flex;gap:10px;align-items:flex-end;
+  padding:9px 15px;border-radius:2px}
+.diag-btn button:active{color:var(--ball);border-color:var(--ball)}
+.composer{display:flex;gap:10px;align-items:flex-end;flex:0 0 auto;
   padding:12px 16px calc(var(--safe-b) + 12px);border-top:1px solid var(--edge);background:var(--ground)}
 .composer .box{flex:1;background:var(--court);border-radius:2px;padding:13px 15px}
 .composer textarea{resize:none;max-height:96px;font-size:15px;line-height:1.45}
@@ -497,8 +499,7 @@ svg.chc .dim{opacity:.05;pointer-events:none}
     <button id="sg-trn" onclick="segTo('trn')">Тренировки</button>
   </div>
   <div id="pane-chat" style="flex:1;display:flex;flex-direction:column;min-height:0">
-    <div class="chat" id="chat"></div>
-    <div id="ai-diag"></div>
+    <div class="chat" id="chat"><div id="ai-diag"></div></div>
     <div class="composer">
       <div class="box"><textarea id="i-chat" rows="1" placeholder="Спроси про подготовку…"
         oninput="grow(this)" onkeydown="chatKey(event)"></textarea></div>
@@ -654,7 +655,7 @@ var CONFIG = {
   BASE:'https://stats.tennismylife.org/data/',
   YEARS:[2026,2025,2024,2023,2022],
   PRICE_SCOUT:4900,
-  VERSION:'v14 · мяч и диагностика ИИ'
+  VERSION:'v16'
 };
 var KEY='moytrener.v2';
 
@@ -1491,9 +1492,9 @@ function zhdatRazbor(nomer, zapis, nachalo){
   nachalo = nachalo || Date.now();
   var proshlo = Math.round((Date.now()-nachalo)/1000);
 
-  if(proshlo > 25*60){
+  if(proshlo > 45*60){
     vidBusy=false; zapis.status='Ошибка';
-    zapis.oshibka='Слишком долго. Видео очень длинное — попробуй короче.';
+    zapis.oshibka='Ждём больше 45 минут. Похоже, обработка застряла — проверь логи на modal.com.';
     save(); paintTraining(); return;
   }
 
@@ -1697,7 +1698,7 @@ function openVideo(id){
         '<div class="mt-b"><div class="o">'+mmss(x.ot)+' — '+mmss(x.do)+'</div>'+
         '<div class="t">'+(x.tochki?x.tochki.length+' замеров':'')+
         (x.podacha?' · подача '+({levo:'влево',centr:'в центр',pravo:'вправо'}[x.podacha]||''):'')+
-        (x.otskokov?' · касаний '+x.otskokov:'')+
+        (x.otskokov?' · смен '+x.otskokov:'')+
         (x.skorost_maks?' · темп '+x.skorost_maks:'')+'</div></div>'+
         '<div class="mt-s">'+x.dlit+' сек</div></div>';
     }).join('') : '<div class="card"><p>Розыгрыши не выделились. Скорее всего съёмка нестабильная или слишком короткая.</p></div>')+
@@ -1744,9 +1745,9 @@ function myachBlok(r){
   var chisla =
     '<div class="stat-grid" style="margin-top:2px">'+
     '<div class="st"><div class="v">'+(m.otskokov_na_rozygrysh!=null?m.otskokov_na_rozygrysh:'—')+'</div>'+
-      '<div class="l">Касаний за розыгрыш</div><div class="n">в среднем</div></div>'+
-    '<div class="st"><div class="v mid">'+(m.udarov_sredne!=null?m.udarov_sredne:'—')+'</div>'+
-      '<div class="l">Ударов в розыгрыше</div><div class="n">оценка</div></div>'+
+      '<div class="l">Смен направления</div><div class="n">за розыгрыш</div></div>'+
+    '<div class="st"><div class="v mid">'+(m.rozygryshey_s_myachom||'—')+'</div>'+
+      '<div class="l">Розыгрышей с мячом</div><div class="n">отслежено</div></div>'+
     '<div class="st"><div class="v mid">'+(m.skorost_srednyaya!=null?m.skorost_srednyaya:'—')+'</div>'+
       '<div class="l">Средний темп</div><div class="n">долей кадра в сек</div></div>'+
     '<div class="st"><div class="v mid">'+(m.skorost_maks!=null?m.skorost_maks:'—')+'</div>'+
@@ -1756,22 +1757,22 @@ function myachBlok(r){
   return '<div class="sec-title"><span class="eyebrow">Мяч · куда идёт подача</span></div>'+
     '<div class="note fact"><svg viewBox="0 0 24 24"><path d="M5 13l4.5 4.5L19 7"/></svg>'+
     '<span>Траектория отслежена в '+m.rozygryshey_s_myachom+' розыгрышах. '+
-    'Касаний покрытия найдено: '+m.otskokov_vsego+'.'+
+    'Смен направления мяча: '+m.otskokov_vsego+'.'+
     (st&&st.dolya_pct!=null?' Мяч виден в '+st.dolya_pct+'% кадров.':'')+
     '</span></div>'+
     podachaSVG(pc)+
     zona('levo','Влево')+
     zona('centr','В центр')+
     zona('pravo','Вправо')+
-    '<div class="bar-n" style="margin-bottom:14px">Направление считается по первому '+
-    'касанию покрытия после подачи.</div>'+
+    '<div class="bar-n" style="margin-bottom:14px">Направление считается по первой '+
+    'смене высоты мяча после подачи — это и есть точка приземления.</div>'+
 
     '<div class="sec-title"><span class="eyebrow">Темп игры</span></div>'+
     chisla+
 
     (m.zony_otskoka && m.tochek_otskoka>=4
-      ? '<div class="sec-title"><span class="eyebrow">Куда падает мяч · '+
-        m.tochek_otskoka+' касаний</span></div>'+zonySVG(m.zony_otskoka,m.tochek_otskoka)
+      ? '<div class="sec-title"><span class="eyebrow">Где мяч меняет направление · '+
+        m.tochek_otskoka+' точек</span></div>'+zonySVG(m.zony_otskoka,m.tochek_otskoka)
       : '');
 }
 
@@ -1791,7 +1792,7 @@ function zonySVG(setka,vsego){
            '" text-anchor="middle">'+k+'</text>':'');
     }
   }
-  return '<div class="court-wrap"><div class="court-cap">Касания покрытия по зонам</div>'+
+  return '<div class="court-wrap"><div class="court-cap">Точки перегиба траектории</div>'+
     '<svg class="court" viewBox="0 0 118 108">'+kletki+
     '<rect class="ln" x="12" y="6" width="94" height="96"/>'+
     '<line class="ln" x1="24" y1="6" x2="24" y2="102"/>'+
@@ -1801,7 +1802,9 @@ function zonySVG(setka,vsego){
     '<line class="ln" x1="59" y1="40" x2="59" y2="68"/>'+
     '<line class="net" x1="6" y1="54" x2="112" y2="54"/></svg>'+
     '<div class="court-key"><i style="color:var(--dim-2)">'+
-    'Ярче — чаще падает мяч. Числа — сколько касаний в зоне.</i></div></div>';
+    'Ярче — чаще. Это места, где мяч менял направление по высоте: '+
+    'отскоки и верхние точки дуги вместе. Разделить их сможем, когда '+
+    'подключим определение корта.</i></div></div>';
 }
 
 /* Схема корта с подсветкой зон подачи */
@@ -1814,8 +1817,8 @@ function podachaSVG(pc){
     var d=pc[z.k]||0;
     var a=(0.10+Math.min(d,100)/100*0.70).toFixed(2);
     return '<rect x="'+z.x+'" y="14" width="'+z.w+'" height="26" fill="#DCF24B" opacity="'+a+'"/>'+
-      '<text class="lbl" x="'+(z.x+z.w/2)+'" y="30" text-anchor="middle">'+
-      (d?d+'%':'—')+'</text>';
+      '<text class="lbl mel" x="'+(z.x+z.w/2)+'" y="29" text-anchor="middle">'+
+      (d?Math.round(d)+'%':'—')+'</text>';
   }).join('');
   return '<div class="court-wrap"><div class="court-cap">Зоны подачи</div>'+
     '<svg class="court" viewBox="0 0 118 108">'+zony+
@@ -2153,6 +2156,76 @@ function finishChart(){
 }
 
 /* ═══ ИИ ═══ */
+/* Собираем всё, что приложение знает: профиль, разборы по базе,
+   разборы видео, ручную разметку. Тренер должен видеть картину целиком. */
+function polnyyKontekst(){
+  var ch=[];
+
+  ch.push('ИГРОК: '+S.name+', '+S.age+' лет, уровень '+S.lvl+', '+
+          S.hand+' рука, '+S.bh+' бэкхенд, '+
+          (S.tour==='w'?'женский тур':'мужской тур')+'.');
+
+  // Разборы соперниц по базе матчей
+  if(S.orders.length){
+    ch.push('\nРАЗОБРАННЫЕ СОПЕРНИЦЫ ('+S.orders.length+'):');
+    S.orders.slice(-3).forEach(function(P){ ch.push(dataBrief(P)) });
+  }else{
+    ch.push('\nРазборы соперниц пока не заказаны.');
+  }
+
+  // Разборы видео
+  var svideo=S.videos.filter(function(v){return v.razbor});
+  if(svideo.length){
+    ch.push('\nРАЗБОРЫ ВИДЕО ('+svideo.length+'):');
+    svideo.slice(0,2).forEach(function(v){
+      var r=v.razbor, it=r.itogo||{}, m=r.myach, p=r.pozicii||{};
+      var s='Запись '+(r.dlitelnost_min||'?')+' мин: розыгрышей '+(it.rozygryshey||0)+
+        ', средняя длина '+(it.srednyaya_dlina_sek||'?')+' сек'+
+        ', самый длинный '+(it.samyy_dlinnyy_sek||'?')+' сек'+
+        ', доля игры '+(it.dolya_igry_pct||'?')+'%'+
+        (it.srednyaya_pauza_sek?', пауза между очками '+it.srednyaya_pauza_sek+' сек':'')+'.';
+      if(m && m.napravleniya_pct){
+        var n=m.napravleniya_pct;
+        s+=' ПОДАЧА по направлениям: влево '+(n.levo||0)+'%, в центр '+(n.centr||0)+
+           '%, вправо '+(n.pravo||0)+'%.';
+        if(m.otskokov_na_rozygrysh)s+=' Касаний покрытия за розыгрыш: '+m.otskokov_na_rozygrysh+'.';
+        if(m.udarov_sredne)s+=' Ударов в розыгрыше примерно '+m.udarov_sredne+'.';
+        if(m.skorost_srednyaya)s+=' Темп мяча средний '+m.skorost_srednyaya+
+           ', максимум '+(m.skorost_maks||'?')+' (долей кадра в секунду).';
+      }
+      if(p.dalniy)s+=' Дальний игрок стоял в среднем на '+
+        Math.round(p.dalniy.y*100)+'% глубины корта, разброс по ширине '+
+        Math.round(p.dalniy.razbros_x*100)+'%.';
+      if(p.blizhniy)s+=' Ближний — на '+Math.round(p.blizhniy.y*100)+
+        '%, разброс '+Math.round(p.blizhniy.razbros_x*100)+'%.';
+      ch.push(s);
+    });
+  }
+
+  // Ручная разметка матчей
+  var razm=S.charts.filter(function(c){return c.points&&c.points.length>=6});
+  if(razm.length){
+    ch.push('\nРУЧНАЯ РАЗМЕТКА ('+razm.length+'):');
+    razm.slice(0,2).forEach(function(c){
+      var st=chartStats(c);
+      if(!st)return;
+      var D={w:'широко',b:'в тело',t:'в угол'};
+      var pc=function(a,b){return b>0?Math.round(a/b*100)+'%':'—'};
+      var s='Матч против '+c.opp+': '+st.n+' очков на её подаче, '+
+        'выиграла '+pc(st.won,st.n)+', эйсов '+st.ace+', двойных '+st.df+'.';
+      if(st.tot)s+=' Направления подачи: '+['w','b','t'].map(function(d){
+        return D[d]+' '+pc(st.dirs[d],st.tot)}).join(', ')+'.';
+      if(st.keyN>=4)s+=' В ВАЖНЫХ ОЧКАХ ('+st.keyN+'): '+['w','b','t'].map(function(d){
+        return D[d]+' '+pc(st.dirsKey[d],st.keyN)}).join(', ')+'.';
+      ch.push(s);
+    });
+  }
+
+  if(S.mirror)ch.push('\nУ игрока подключено «Зеркало» — разбор собственной игры.');
+
+  return ch.join('\n');
+}
+
 function dataBrief(P){
   var s=P.serve,r=P.ret;
   var surf=Object.keys(P.bySurf).filter(function(k){return P.bySurf[k].n>=3})
@@ -2161,7 +2234,7 @@ function dataBrief(P){
   return [
     'Игрок: '+P.name+'. '+(P.hand==='L'?'Левша':'Правша')+'. '+(P.ioc||'')+' '+
       (P.age?years(P.age):'')+'. Лучший ранг: '+(P.bestRank||'н/д')+'.',
-    'Матчей в базе: '+P.n+', со статистикой: '+P.withStats+'. Побед: '+P.wins+'.',
+    'Матчей в базе: '+P.n+(P.withStats?', со статистикой: '+P.withStats:'')+'. Побед: '+P.wins+'.',
     'ПОДАЧА — первая в корте '+fmt(s.in1,1)+'; очков на первой '+fmt(s.won1,1)+
       '; очков на второй '+fmt(s.won2,1)+'; эйсы '+fmt(s.ace,1)+'; двойные '+fmt(s.df,1)+
       '; спасено брейк-пойнтов '+fmt(s.bp,1)+' из '+s.bpF+'.',
@@ -2342,11 +2415,22 @@ function pingAI(){
   });
 }
 
+/* Кнопка проверки живёт внутри ленты сообщений,
+   чтобы не отжимать поле ввода вниз экрана.        */
+function dobavitDiag(){
+  var c=document.getElementById('chat');
+  var d=document.createElement('div');
+  d.className='diag-btn';
+  d.innerHTML='<button onclick="pingAI()">Проверить связь с ИИ</button>'+
+              '<span id="ai-diag"></span>';
+  c.appendChild(d);
+  c.scrollTop=c.scrollHeight;
+}
+
 function initChat(){
   document.getElementById('chat').innerHTML='';
-  bubble(S.name+', я на связи.\n\nЗакажи разбор во вкладке «Анализ» — и здесь разберём соперницу подробно: как строить геймы, что делать на её подаче, где забирать брейк.\n\nЕсли не отвечаю — нажми «Проверить ИИ» под этим сообщением.',false);
-  document.getElementById('ai-diag').innerHTML=
-    '<div class="diag-btn"><button onclick="pingAI()">Проверить ИИ</button></div>';
+  bubble(S.name+', я на связи.\n\nСпрашивай про подготовку: как строить первый гейм, что делать на её подаче, где забирать брейк. Закажи разбор во вкладке «Анализ» — тогда отвечу по конкретным числам соперницы.',false);
+  dobavitDiag();
 }
 function askAbout(){
   closeSheet('sh-rep');tab('s-coach');segTo('chat');
@@ -2376,11 +2460,20 @@ function sendMsg(){
   c.appendChild(wait);c.scrollTop=c.scrollHeight;
   document.getElementById('b-send').disabled=true;
 
-  var P=S.orders.length?S.orders[S.orders.length-1]:null;
-  var ctx=P?('РЕАЛЬНЫЕ ДАННЫЕ соперницы:\n'+dataBrief(P)):'Разбор соперницы ещё не заказан — данных нет.';
-  var sys='Ты — тренер по теннису в приложении «Мой тренер». Отвечай по-русски коротко и конкретно, как тренер на корте: 2-4 абзаца, без длинных списков, без воды.\n'+
-    'Игрок: '+S.name+', '+S.age+' лет, уровень '+S.lvl+', '+S.hand+' рука, '+S.bh+' бэкхенд.\n'+ctx+'\n'+
-    'КРИТИЧЕСКОЕ ПРАВИЛО: опирайся только на приведённые числа. НИКОГДА не выдумывай статистику, которой нет — направления подач, типы ударов, поведение в конкретных счётах тебе НЕИЗВЕСТНЫ. Если спрашивают о том, чего нет в данных, честно скажи это и предложи, что можно понять из имеющихся чисел.';
+  var sys='Ты — личный тренер по теннису в приложении «Мой тренер». '+
+    'Отвечай по-русски, коротко и конкретно, как тренер на корте: 2-4 абзаца, '+
+    'без длинных списков и без воды. Обращайся по имени.\n\n'+
+    'ЧТО ТЫ ЗНАЕШЬ ОБ ЭТОМ ИГРОКЕ:\n'+polnyyKontekst()+'\n\n'+
+    'ЧЕМ ТЫ ПОМОГАЕШЬ: тактика на конкретного соперника, разбор своей игры по '+
+    'данным видео и разметки, план на тренировку, подготовка к матчу, работа с '+
+    'волнением и режимом. Общие вопросы про теннис — техника, физика, питание, '+
+    'восстановление — тоже твои: отвечай как опытный тренер.\n\n'+
+    'ГЛАВНОЕ ПРАВИЛО: когда говоришь о конкретных числах — бери их только из '+
+    'данных выше и называй прямо. НЕ ВЫДУМЫВАЙ статистику, которой там нет. '+
+    'Если данных для ответа не хватает — так и скажи, объясни, чего не хватает, '+
+    'и посоветуй, что можно понять из того, что есть. Общие тренерские знания '+
+    'использовать можно и нужно — ограничение касается только выдуманных цифр '+
+    'про конкретного игрока.';
 
   var finish=function(out,pochemu){
     if(!out){
@@ -2433,6 +2526,7 @@ function boot(){
   if(S.chat.length){
     bubble(S.name+', продолжаем.',false);
     S.chat.forEach(function(m){bubble(m.content,m.role==='user')});
+    dobavitDiag();
   }else initChat();
   tab('s-home');
   DB.init();

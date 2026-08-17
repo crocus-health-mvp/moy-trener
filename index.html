@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no, interactive-widget=resizes-content">
 <meta name="theme-color" content="#0C1B2E">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -33,7 +33,8 @@ a{color:var(--ball);text-decoration:none}
 .eyebrow{font-family:'Oswald',sans-serif;font-weight:400;font-size:11px;
   letter-spacing:.22em;text-transform:uppercase;color:var(--dim-2)}
 .num{font-family:'Oswald',sans-serif;font-weight:500;font-variant-numeric:tabular-nums}
-#app{position:fixed;top:0;left:0;right:0;height:100dvh;overflow:hidden;max-width:520px;margin:0 auto;
+#app{position:fixed;top:0;left:0;right:0;height:100dvh;height:var(--vh,100dvh);
+  overflow:hidden;max-width:520px;margin:0 auto;
   border-left:1px solid var(--edge);border-right:1px solid var(--edge)}
 .screen{position:absolute;top:0;left:0;right:0;bottom:0;display:none;
   flex-direction:column;background:var(--ground);min-height:0}
@@ -1705,6 +1706,31 @@ function dropVideo(i){
    Если по ссылке — файл лежит в облаке, браузер его
    не пустит, поэтому показываем время для перемотки.
    ═══════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════
+   КЛАВИАТУРА НА iOS
+   Safari при фокусе в поле не сжимает страницу, а
+   выталкивает её вверх — «position:fixed» уезжает
+   вместе с ней. Ловим настоящую видимую высоту и
+   отдаём её в CSS, чтобы приложение просто сжималось.
+   ═══════════════════════════════════════════════════ */
+(function(){
+  var vv=window.visualViewport;
+  if(!vv)return;
+
+  function podognat(){
+    document.documentElement.style.setProperty('--vh',vv.height+'px');
+    // Safari всё равно успевает сдвинуть страницу — возвращаем на место
+    if(window.scrollY!==0)window.scrollTo(0,0);
+  }
+
+  vv.addEventListener('resize',podognat);
+  vv.addEventListener('scroll',podognat);
+  window.addEventListener('orientationchange',function(){
+    setTimeout(podognat,300);
+  });
+  podognat();
+})();
 
 var MOM_VID = null;
 var MOM_KLIPY = {};      // номер розыгрыша → есть ли нарезка

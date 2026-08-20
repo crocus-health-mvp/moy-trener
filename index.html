@@ -260,6 +260,71 @@ svg.court .lbl.mel{font-size:7.5px;letter-spacing:0}
 .kort-niz{color:var(--dim-2);font-size:12px;margin-top:9px}
 .kort-zam{color:var(--dim-2);font-size:12px;line-height:1.45;margin-top:7px}
 
+/* ─── Эргономика: главные действия крупнее ─── */
+.btn.big{padding:16px 18px;font-size:13.5px;letter-spacing:.13em}
+
+/* Вводная строка раздела — объясняет, что здесь, до списка */
+.vvod{color:var(--dim);font-size:13px;line-height:1.55;margin-bottom:16px;
+  padding-left:11px;border-left:2px solid var(--ball)}
+.vvod b{color:var(--line)}
+
+/* Итог поиска с сортировкой */
+.itog{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px;
+  color:var(--dim-2);font-size:12.5px;margin-bottom:14px}
+.itog b{font-size:17px;color:var(--line)}
+.itog-sort{display:flex;gap:6px;width:100%;margin-top:9px}
+.itog-sort button{flex:1;padding:8px 4px;border:1px solid var(--edge-2);
+  border-radius:2px;background:none;color:var(--dim);font-size:11.5px;
+  font-family:'Oswald',sans-serif;letter-spacing:.06em;text-transform:uppercase}
+.itog-sort button.on{background:var(--ball);color:var(--ground);border-color:var(--ball)}
+
+.pusto{border:1px dashed var(--edge-2);border-radius:3px;padding:22px 16px;
+  text-align:center;color:var(--dim-2);font-size:13px;line-height:1.6;
+  margin-bottom:14px}
+
+/* ─── Главная: гео, фильтры ─── */
+.geo{display:flex;align-items:center;gap:9px;width:100%;padding:11px 13px;
+  border:1px solid var(--edge);border-radius:3px;margin-bottom:10px;
+  background:var(--court);color:var(--line);font-size:13px;text-align:left}
+.geo svg{width:17px;height:17px;flex:0 0 auto;fill:none;stroke:var(--ball);stroke-width:1.7}
+.geo span{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.geo b{color:var(--ball);font-size:11px;letter-spacing:.1em;text-transform:uppercase}
+
+.filtry{display:flex;gap:7px;overflow-x:auto;margin-bottom:12px;padding-bottom:3px;
+  -webkit-overflow-scrolling:touch}
+.filtry button{flex:0 0 auto;padding:7px 12px;border:1px solid var(--edge-2);
+  border-radius:2px;color:var(--dim);font-size:12px;white-space:nowrap;background:none}
+.filtry button.on{background:var(--ball);color:var(--ground);border-color:var(--ball)}
+
+.trn-tap{display:flex;width:100%;text-align:left;background:none;align-items:center}
+.trn-go{color:var(--dim-2);font-size:22px;padding-left:6px}
+
+/* ─── Реклама ─── */
+.reklama{border:1px dashed var(--edge-2);border-radius:3px;padding:14px;
+  margin:4px 0 16px;text-align:center}
+.reklama-mtk{font-family:'Oswald',sans-serif;font-size:9px;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--dim-2)}
+.reklama-telo{color:var(--dim-2);font-size:13px;margin:9px 0 11px}
+.reklama button{font-size:11px;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--ball);background:none;font-family:'Oswald',sans-serif}
+
+/* ─── Очередь на матчинг ─── */
+.ochered{border:1px solid var(--edge);border-radius:3px;padding:15px;margin-bottom:16px}
+.och-verh{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px}
+.och-verh b{font-size:19px;color:var(--ball)}
+
+/* ─── Карточка игрока ─── */
+.igrok{display:flex;gap:13px;border:1px solid var(--edge);border-radius:3px;
+  padding:14px;margin-bottom:11px;background:var(--court)}
+.igrok-foto{width:52px;height:52px;flex:0 0 auto;border-radius:50%;
+  background:var(--court-2);display:flex;align-items:center;justify-content:center}
+.igrok-foto span{font-family:'Oswald',sans-serif;font-size:21px;color:var(--dim)}
+.igrok-telo{flex:1;min-width:0}
+.igrok-verh{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.igrok-verh h3{font-size:15px}
+.igrok-rejt{color:var(--ball);font-size:12px;white-space:nowrap}
+.igrok-rejt span{color:var(--dim-2)}
+
 .pf-head{display:flex;gap:15px;align-items:center;padding:22px 0 24px;
   border-bottom:1px solid var(--edge);margin-bottom:6px}
 .pf-av{width:62px;height:62px;flex:0 0 62px;border-radius:50%;background:var(--court);
@@ -460,7 +525,19 @@ svg.chc .dim{opacity:.05;pointer-events:none}
       <input id="i-name" placeholder="Имя" autocomplete="given-name"></div>
     <div class="field"><label>Возраст</label>
       <input id="i-age" type="number" inputmode="numeric" placeholder="17"></div>
-    <label class="eyebrow" style="display:block;margin-bottom:8px">Тур</label>
+    <div class="field"><label>Город</label>
+      <input id="i-gorod" placeholder="Москва" autocomplete="address-level2"></div>
+    <div class="q-sub" style="margin:-10px 0 18px">По городу подбираем корты, турниры и партнёров.
+      Если твоего пока нет — напишешь нам, и мы его добавим.</div>
+
+    <label class="eyebrow" style="display:block;margin-bottom:8px">Во что играешь</label>
+    <div class="chips" id="c-sport">
+      <button class="chip on" data-v="tennis">Теннис</button>
+      <button class="chip" data-v="padel">Падл</button>
+      <button class="chip" data-v="oba">И то, и другое</button>
+    </div>
+
+    <label class="eyebrow" style="display:block;margin:22px 0 8px">Тур</label>
     <div class="q-sub" style="margin-bottom:12px">Определяет, среди кого искать соперников.</div>
     <div class="chips" id="c-tour">
       <button class="chip on" data-v="w">Женский · WTA / ITF</button>
@@ -500,34 +577,41 @@ svg.chc .dim{opacity:.05;pointer-events:none}
     <div class="step-bar"><i class="on"></i><i class="on"></i><i class="on"></i></div>
     <div class="coach-line"><div class="coach-av"></div>
       <div class="coach-bub" id="tour-bub"></div></div>
-    <div class="card lit"><h3>Разбор соперника</h3>
-      <p>Ввожу имя — достаю настоящую статистику её матчей: подача, приём, брейк-пойнты, разбивка по покрытиям. Дальше объясняю, что эти числа значат на корте.</p></div>
-    <div class="card lit"><h3>Только проверяемые числа</h3>
-      <p>Вся статистика из открытой базы результатов. Я ничего не придумываю: если данных нет — так и пишу.</p></div>
-    <div class="card lit"><h3>Подготовка в диалоге</h3>
-      <p>После разбора можно спрашивать дальше: как строить первый гейм, что делать на её подаче, где забирать брейк.</p></div>
+    <div class="card lit"><h3>Главная · корты и турниры</h3>
+      <p>Две вкладки. В кортах — теннис и падл, фильтры по цене, покрытию и расстоянию, видно где крытые. В турнирах — то, что подходит твоему уровню, с заявкой на участие.</p></div>
+    <div class="card lit"><h3>Игроки · с кем играть</h3>
+      <p>Подбор партнёра по уровню, полу и району. Пока копим очередь: запустим, когда в городе наберётся достаточно людей, иначе листать будет некого.</p></div>
+    <div class="card lit"><h3>Тренер · три вкладки</h3>
+      <p><b>Моё видео</b> — загружаешь запись, режу на розыгрыши, нахожу игроков и мяч, считаю позиции в метрах, каждый розыгрыш отдаю отдельным клипом.<br><br><b>Соперник</b> — ввожу фамилию, достаю статистику из открытой базы: подача, приём, брейк-пойнты, разбивка по покрытиям.<br><br><b>Диалог</b> — спрашивай дальше. Отвечаю точнее, когда уже видел твоё видео.</p></div>
+    <div class="card lit"><h3>Магазин · вещи и тренеры</h3>
+      <p>Купить, б/у, ремонт, живые тренеры. Показываю ближайшие магазины и мастерские с адресом и телефоном — сам ничего не продаю.</p></div>
+    <div class="card"><h3>Что пока не работает</h3>
+      <p>Бронирование корта, оплата турнира и подписки. Там, где кнопка ещё не работает, я пишу об этом прямо — не делаю вид, что сработало.</p></div>
   </div>
   <div class="foot-fix"><button class="btn" onclick="finishOnb()">Открыть приложение</button></div>
 </section>
 
 <section class="screen" id="s-home">
   <div class="hdr"><div><h2 id="home-hi">Главная</h2><div class="sub" id="home-sub"></div></div></div>
+  <div class="seg">
+    <button class="on" id="sg-kort" onclick="glavTo('kort')">Корты</button>
+    <button id="sg-turn" onclick="glavTo('turn')">Турниры</button>
+  </div>
   <div class="scroll pad-tabs">
-    <div id="db-state"></div>
-    <div class="sec-title"><span class="eyebrow">Ближайшие турниры</span></div>
-    <div id="trn-list"></div>
-    <div class="sec-title"><span class="eyebrow">Где играть</span></div>
-    <button class="btn ghost" style="width:100%;margin-bottom:18px"
-      onclick="otkrytKorty()">Корты рядом · цены и покрытие</button>
-
-    <div class="sec-title"><span class="eyebrow">Что разобрать сейчас</span></div>
-    <div class="card lit"><h3>Соперник по первому кругу</h3>
-      <p>Сетка открывается за сутки. Разбор занимает минуты — успеешь накануне вечером.</p></div>
-    <div class="card"><h3>Смена покрытия</h3>
-      <p>После харда на грунте отскок выше, розыгрыши длиннее, подача даёт меньше. Соперника с харда разбирать заново — в разборе есть разбивка по покрытиям.</p>
-      <div class="meta"><span class="pill clay">Грунт</span><span class="pill hard">Хард</span></div></div>
+    <div id="home-korty"></div>
+    <div id="trn-pin" style="display:none"></div>
     <div class="credit" id="credit"></div>
   </div>
+</section>
+
+<section class="screen" id="s-play">
+  <div class="hdr"><div><h2>С кем играть</h2><div class="sub">Партнёр по уровню и району</div></div></div>
+  <div class="scroll pad-tabs" id="play-body"></div>
+</section>
+
+<section class="screen" id="s-shop">
+  <div class="hdr"><div><h2>Магазин</h2><div class="sub">Экипировка, ремонт, занятия</div></div></div>
+  <div class="scroll pad-tabs" id="shop-body"></div>
 </section>
 
 <section class="screen" id="s-scout">
@@ -548,12 +632,12 @@ svg.chc .dim{opacity:.05;pointer-events:none}
 <section class="screen" id="s-coach">
   <div class="hdr"><div><h2>Тренер</h2><div class="sub">Подготовка к матчу</div></div></div>
   <div class="seg">
-    <button class="on" id="sg-chat" onclick="segTo('chat')">Диалог</button>
-    <button id="sg-rep" onclick="segTo('rep')">Разборы</button>
-    <button id="sg-trn" onclick="segTo('trn')">Тренировки</button>
+    <button class="on" id="sg-trn" onclick="segTo('trn')">Моё видео</button>
+    <button id="sg-rep" onclick="segTo('rep')">Соперник</button>
+    <button id="sg-chat" onclick="segTo('chat')">Диалог</button>
   </div>
   <div class="pane-wrap">
-  <div id="pane-chat" class="on">
+  <div id="pane-chat">
     <div class="chat" id="chat"><div id="ai-diag"></div></div>
     <div class="composer">
       <div class="box"><textarea id="i-chat" rows="1" placeholder="Спроси про подготовку…"
@@ -563,7 +647,7 @@ svg.chc .dim{opacity:.05;pointer-events:none}
     </div>
   </div>
   <div id="pane-rep" class="pane-scroll"></div>
-  <div id="pane-trn" class="pane-scroll"></div>
+  <div id="pane-trn" class="pane-scroll" style="display:block"></div>
   </div>
 </section>
 
@@ -575,6 +659,9 @@ svg.chc .dim{opacity:.05;pointer-events:none}
       <div><div class="pf-n" id="pf-n">—</div><div class="pf-d" id="pf-d">—</div></div>
     </div>
     <button class="row" onclick="openEdit()"><span class="k">Мои данные</span><span class="v">Изменить</span></button>
+
+    <div class="sec-title" style="margin-top:20px"><span class="eyebrow">Подписка</span></div>
+    <div class="kort" id="podpiska-box"></div>
     <div class="row"><span class="k">Разборов заказано</span><span class="v num" id="pf-cnt">0</span></div>
     <button class="row" onclick="togglePrivacy()">
       <span class="k">Скрыть меня из поиска<br><span style="font-size:11.5px;color:var(--dim-2)">Бесплатно, в любой момент</span></span>
@@ -650,6 +737,34 @@ svg.chc .dim{opacity:.05;pointer-events:none}
   <div class="scroll" id="mom-body"></div>
 </section>
 
+<section class="sheet" id="sh-trn">
+  <div class="sheet-hdr"><button class="x" onclick="closeSheet('sh-trn')">
+    <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <h3>Турнир</h3></div>
+  <div class="scroll" id="trn-body"></div>
+</section>
+
+<section class="sheet" id="sh-gorod">
+  <div class="sheet-hdr"><button class="x" onclick="closeSheet('sh-gorod')">
+    <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <h3>Добавить город</h3></div>
+  <div class="scroll">
+    <p style="color:var(--dim-2);font-size:13px;line-height:1.55;margin-bottom:18px">
+      Напиши, где ты играешь — по этим заявкам мы и решаем, какой город
+      подключать следующим. Всё, кроме города, можно не заполнять.
+    </p>
+    <div class="field"><label>Город</label><input id="g-gorod" placeholder="Например, Екатеринбург"></div>
+    <div class="field"><label>Какие корты добавить</label>
+      <textarea id="g-korty" rows="3" placeholder="Названия клубов, если знаешь"></textarea></div>
+    <div class="field"><label>Что добавить или изменить в приложении</label>
+      <textarea id="g-idei" rows="3" placeholder="Свободно"></textarea></div>
+    <div class="field"><label>Контакт для связи</label>
+      <input id="g-svyaz" placeholder="Телефон или @ник"></div>
+    <button class="btn big" style="width:100%" onclick="otpravitGorod()">Отправить заявку</button>
+    <div class="credit">Заявки читаем руками. Ответим, когда подключим твой город.</div>
+  </div>
+</section>
+
 <section class="sheet" id="sh-korty">
   <div class="sheet-hdr"><button class="x" onclick="closeSheet('sh-korty')">
     <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
@@ -702,12 +817,15 @@ svg.chc .dim{opacity:.05;pointer-events:none}
   <button class="tab on" data-s="s-home" onclick="tab('s-home')">
     <svg viewBox="0 0 24 24"><path d="M4 10l8-6 8 6v9a1 1 0 01-1 1h-4v-6h-6v6H5a1 1 0 01-1-1z"/></svg>
     <span>Главная</span></button>
-  <button class="tab" data-s="s-scout" onclick="tab('s-scout')">
-    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
-    <span>Анализ</span></button>
+  <button class="tab" data-s="s-play" onclick="tab('s-play')">
+    <svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3 19c0-3 2.7-5 6-5s6 2 6 5"/><path d="M17 8h4M19 6v4"/></svg>
+    <span>Игроки</span></button>
   <button class="tab" data-s="s-coach" onclick="tab('s-coach')">
     <svg viewBox="0 0 24 24"><path d="M20 15a2 2 0 01-2 2H8l-4 4V6a2 2 0 012-2h12a2 2 0 012 2z"/></svg>
     <span>Тренер</span></button>
+  <button class="tab" data-s="s-shop" onclick="tab('s-shop')">
+    <svg viewBox="0 0 24 24"><path d="M5 8h14l-1 12H6z"/><path d="M9 8V6a3 3 0 016 0v2"/></svg>
+    <span>Магазин</span></button>
   <button class="tab" data-s="s-me" onclick="tab('s-me')">
     <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c0-3.6 3.1-6 7-6s7 2.4 7 6"/></svg>
     <span>Профиль</span></button>
@@ -734,19 +852,22 @@ var CONFIG = {
   BASE:'https://stats.tennismylife.org/data/',
   YEARS:[2026,2025,2024,2023,2022],
   PRICE_SCOUT:4900,
-  VERSION:'v21 · корты, клипы и разметка'
+  VERSION:'v24 · эргономика и структура'
 };
 var KEY='moytrener.v2';
 
 var S={
-  name:'',age:'',tour:'w',lvl:'ITF / Челленджер',hand:'Правая',bh:'Двуручный',
+  name:'',age:'',gorod:'',sport:'tennis',podpiska:false,ochered:false,zayavki:[],
+  tour:'w',lvl:'ITF / Челленджер',hand:'Правая',bh:'Двуручный',
   orders:[],videos:[],charts:[],mirror:false,hidden:false,current:null,chat:[],onboarded:false,_pending:null
 };
 
 /* ═══ ХРАНЕНИЕ ═══ */
 function save(){
   try{localStorage.setItem(KEY,JSON.stringify({
-    name:S.name,age:S.age,tour:S.tour,lvl:S.lvl,hand:S.hand,bh:S.bh,
+    name:S.name,age:S.age,gorod:S.gorod,sport:S.sport,
+    podpiska:S.podpiska,ochered:S.ochered,zayavki:S.zayavki,
+    tour:S.tour,lvl:S.lvl,hand:S.hand,bh:S.bh,
     mirror:S.mirror,hidden:S.hidden,onboarded:S.onboarded,
     videos:S.videos.slice(0,8),charts:S.charts.slice(0,12),
     orders:S.orders.map(function(o){return {key:o.key}}),
@@ -758,6 +879,15 @@ function load(){
     var d=JSON.parse(localStorage.getItem(KEY)||'null');
     if(!d||!d.name)return false;
     S.name=d.name;S.age=d.age||'—';S.tour=d.tour||'w';
+    S.gorod=d.gorod||'';
+    S.sport=d.sport||'tennis';
+    S.podpiska=!!d.podpiska; S.ochered=!!d.ochered;
+    S.zayavki=Array.isArray(d.zayavki)?d.zayavki:[];
+    if(S.gorod){
+      if(GORODA.indexOf(S.gorod)<0)GORODA.push(S.gorod);
+      GOROD_TEK=S.gorod;
+    }
+    if(S.sport)SPORT=S.sport;
     S.lvl=d.lvl||'ITF / Челленджер';S.hand=d.hand||'Правая';S.bh=d.bh||'Двуручный';
     S.mirror=!!d.mirror;S.hidden=!!d.hidden;S.onboarded=!!d.onboarded;
     S.chat=Array.isArray(d.chat)?d.chat:[];
@@ -780,8 +910,31 @@ function go(id){
   for(var i=0;i<all.length;i++)all[i].classList.remove('on');
   var el=document.getElementById(id); if(el)el.classList.add('on');
 }
+function otpravitGorod(){
+  var g=(document.getElementById('g-gorod')||{}).value||'';
+  if(!g.trim()){toast('Напиши хотя бы город');return}
+  // Пока копим заявки локально — сервера под них ещё нет.
+  // Это честнее, чем делать вид, что заявка ушла.
+  S.zayavki=(S.zayavki||[]).concat([{
+    gorod:g.trim(),
+    korty:(document.getElementById('g-korty')||{}).value||'',
+    idei:(document.getElementById('g-idei')||{}).value||'',
+    svyaz:(document.getElementById('g-svyaz')||{}).value||'',
+    kogda:new Date().toISOString()
+  }]);
+  save();
+  ['g-gorod','g-korty','g-idei','g-svyaz'].forEach(function(id){
+    var e=document.getElementById(id); if(e)e.value='';
+  });
+  closeSheet('sh-gorod');
+  toast('Записали. Спасибо, брат');
+}
+
 function tab(id){
   go(id);
+  if(id==='s-home')paintHome();
+  if(id==='s-play')paintPlay();
+  if(id==='s-shop')paintShop();
   var t=document.querySelectorAll('.tab');
   for(var i=0;i<t.length;i++)t[i].classList.toggle('on',t[i].dataset.s===id);
 }
@@ -807,7 +960,22 @@ chipGroup('c-hand','hand');chipGroup('c-bh','bh');
 function saveHello(){
   var n=document.getElementById('i-name').value.trim();
   if(!n){toast('Введи имя — буду обращаться по нему');return}
-  S.name=n;S.age=document.getElementById('i-age').value.trim()||'—';
+  S.name=n;
+  S.age=document.getElementById('i-age').value.trim()||'—';
+
+  var g=(document.getElementById('i-gorod')||{}).value||'';
+  g=g.trim();
+  if(g){
+    S.gorod=g;
+    // Если города нет в списке — добавляем, чтобы человек его видел.
+    // Кортов там пока не будет, но экран честно предложит написать нам.
+    if(GORODA.indexOf(g)<0)GORODA.push(g);
+    GOROD_TEK=g;
+  }
+
+  S.sport=SPORT=(document.querySelector('#c-sport .chip.on')||{dataset:{}})
+    .dataset.v||'tennis';
+
   document.getElementById('q-lvl').textContent=S.name+', на каком уровне играешь?';
   go('s-lvl');
 }
@@ -1208,16 +1376,374 @@ var TOURNAMENTS=[
 function paintHome(){
   document.getElementById('home-hi').textContent='Привет, '+S.name;
   document.getElementById('home-sub').textContent=
-    (S.tour==='w'?'Женский тур':'Мужской тур')+' · '+S.lvl;
-  document.getElementById('trn-list').innerHTML=TOURNAMENTS.map(function(t){
-    return '<div class="trn"><div class="trn-date"><div class="d num">'+t[0]+
-      '</div><div class="m">'+t[1]+'</div></div><div class="trn-body"><div class="t">'+
-      t[2]+'</div><div class="p">'+t[3]+'</div></div></div>'}).join('');
+    GOROD_TEK+(TOCHKA?' · '+TOCHKA:'');
+  narisovatGlavnuyu();
+  if(GLAV==='turn')narisovatTurniry();
   var c='Данные матчей: TennisMyLife (stats.tennismylife.org), лицензия MIT. '+
     'Прежний источник — репозиторий Jeff Sackmann — закрыт автором в 2026 году. '+
     'Разметка матчей внутри приложения — собственные данные пользователя.';
   document.getElementById('credit').textContent=CONFIG.VERSION+'. '+c;
   document.getElementById('credit2').textContent=CONFIG.VERSION+'. '+c;
+}
+
+/* ═══════════════════════════════════════════════════
+   С КЕМ ИГРАТЬ
+   Запускать матчинг на пустой базе нельзя: первые
+   придут, никого не найдут и не вернутся. Поэтому
+   сначала копим очередь и честно показываем счётчик.
+   ═══════════════════════════════════════════════════ */
+
+var PORO_ZAPUSKA = 50;   // сколько игроков в городе нужно для старта
+
+var PRIMERY = [
+  { imya:'Артём', vozr:24, lvl:'Любитель · 3.5', sport:'Теннис',
+    rayon:'Сокольники · 3 км', rejting:4.8, otzyvov:12,
+    o:'Играю по будням вечером. Ищу ровного партнёра для регулярных встреч.' },
+  { imya:'Марина', vozr:29, lvl:'Уверенный · 4.0', sport:'Теннис',
+    rayon:'Хамовники · 5 км', rejting:4.9, otzyvov:23,
+    o:'Утренние корты, люблю длинные размены. Могу подстроиться по уровню.' },
+  { imya:'Илья', vozr:33, lvl:'Начинающий · 2.5', sport:'Падл',
+    rayon:'Сити · 6 км', rejting:4.6, otzyvov:5,
+    o:'Только начал, ищу компанию на выходные. Корт беру на себя.' }
+];
+
+function paintPlay(){
+  var b=document.getElementById('play-body');
+  if(!b)return;
+
+  var vocheredi = (S.ochered? 1:0) + 17;   // пока условный счётчик
+
+  b.innerHTML=
+    '<div class="note soft"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/>'+
+    '<path d="M12 8v5M12 16.5v.01"/></svg><span><b>Скоро появится.</b> '+
+    'Подбор партнёра включим, когда в городе наберётся достаточно игроков — '+
+    'иначе листать будет некого. Записывайся в очередь, напишем первым.</span></div>'+
+
+    '<div class="ochered">'+
+      '<div class="och-verh"><span class="eyebrow">'+esc(GOROD_TEK)+'</span>'+
+      '<b class="num">'+vocheredi+' / '+PORO_ZAPUSKA+'</b></div>'+
+      '<div class="load-bar"><i style="width:'+
+        Math.min(100, Math.round(vocheredi/PORO_ZAPUSKA*100))+'%"></i></div>'+
+      '<div class="bar-n">Игроков записалось в твоём городе</div>'+
+    '</div>'+
+
+    (S.ochered
+      ? '<div class="note fact"><svg viewBox="0 0 24 24"><path d="M5 13l4.5 4.5L19 7"/></svg>'+
+        '<span>Ты в очереди. Напишем, как только запустим подбор.</span></div>'
+      : '<button class="btn big" style="width:100%;margin-bottom:18px" '+
+        'onclick="vOchered()">Записаться в очередь</button>')+
+
+    '<div class="sec-title"><span class="eyebrow">Как это будет выглядеть</span></div>'+
+
+    PRIMERY.map(function(p){
+      return '<div class="igrok">'+
+        '<div class="igrok-foto"><span>'+esc(p.imya[0])+'</span></div>'+
+        '<div class="igrok-telo">'+
+          '<div class="igrok-verh"><h3>'+esc(p.imya)+', '+p.vozr+'</h3>'+
+            '<div class="igrok-rejt">★ '+p.rejting+'<span> · '+p.otzyvov+'</span></div></div>'+
+          '<div class="meta"><span class="pill">'+esc(p.sport)+'</span>'+
+            '<span class="pill">'+esc(p.lvl)+'</span></div>'+
+          '<div class="kort-adr">'+esc(p.rayon)+'</div>'+
+          '<div class="kort-zam">'+esc(p.o)+'</div>'+
+        '</div></div>';
+    }).join('')+
+
+    '<div class="bar-n" style="margin:-4px 0 16px">Карточки выше — пример оформления, '+
+    'а не настоящие люди.</div>'+
+
+    reklama('Игроки')+
+
+    '<div class="credit">При запуске будут: фильтры по уровню, полу, виду спорта '+
+    'и району, отзывы об игроках, чат после взаимного интереса и общая кнопка '+
+    '«забронировать корт». Жалоба и блокировка — с первого дня.</div>';
+}
+
+function vOchered(){
+  S.ochered=true; save(); paintPlay();
+  toast('Записали. Напишем при запуске');
+}
+
+/* ═══════════════════════════════════════════════════
+   МАГАЗИН
+   Это справочник, а не склад: мы никого не отгружаем,
+   а показываем, к кому идти. Поэтому у каждой позиции
+   адрес и телефон, а не корзина.
+   ═══════════════════════════════════════════════════ */
+
+var SHOP_RAZDEL='ekip';
+
+var TOCHKI_SHOP={
+  ekip:[
+    { imya:'Tennis Pro', adr:'Москва, Ленинградский пр-т 31', tel:'+7 495 000-00-01',
+      chto:'Ракетки, одежда, кроссовки. Теннис и падл.', km:4.1 },
+    { imya:'Racket Store', adr:'Москва, ул. Правды 24', tel:'+7 495 000-00-02',
+      chto:'Ракетки Head, Wilson, Babolat. Подбор по весу и балансу.', km:6.3 }
+  ],
+  bu:[
+    { imya:'Барахолка клуба «Чайка»', adr:'Москва, Остоженка 37', tel:'+7 495 000-00-03',
+      chto:'Б/у ракетки и экипировка от игроков клуба.', km:2.4 }
+  ],
+  remont:[
+    { imya:'Мастерская «Струна»', adr:'Москва, Майский просек 7', tel:'+7 495 000-00-04',
+      chto:'Перетяжка за сутки, свой выбор струн.', cena:1500, km:4.2 },
+    { imya:'RacketFix', adr:'Москва, Пресненская наб. 12', tel:'+7 495 000-00-05',
+      chto:'Перетяжка, замена намотки, ремонт обода.', km:5.9 }
+  ],
+  trener:[
+    { imya:'Разбор от тренера', adr:'Онлайн · 2 рабочих дня', tel:'',
+      chto:'Живой тренер смотрит твою запись и даёт тактический разбор письменно.',
+      cena:2500, razbor:true },
+    { imya:'Занятие с тренером', adr:'Москва · корт на выбор', tel:'+7 495 000-00-06',
+      chto:'Индивидуальная тренировка, 60 минут. Корт оплачивается отдельно.',
+      cena:4000 }
+  ]
+};
+
+function paintShop(){
+  var b=document.getElementById('shop-body');
+  if(!b)return;
+
+  var r=SHOP_RAZDEL, spisok=TOCHKI_SHOP[r]||[];
+  var vvod={
+    ekip:'Где купить ракетку, одежду и кроссовки. Мы ничего не продаём сами — показываем ближайшие магазины.',
+    bu:'Ракетки и экипировка с рук. Дешевле, но смотреть надо вживую.',
+    remont:'Перетяжка, намотка, ремонт обода. Обычно за сутки.',
+    trener:'Живой тренер смотрит твою запись и пишет, что менять. Это не автомат.'
+  }[r];
+
+  b.innerHTML=
+    '<div class="seg" style="margin:0 0 12px">'+
+      shopKn('ekip','Купить')+shopKn('bu','Б/У')+
+      shopKn('remont','Ремонт')+shopKn('trener','Тренеры')+
+    '</div>'+
+
+    '<div class="vvod">'+esc(vvod)+'</div>'+
+
+    spisok.map(function(t){
+      return '<div class="kort'+(t.razbor?' kort-ai':'')+'">'+
+        (t.razbor?'<div class="kort-lenta">Живой тренер</div>':'')+
+        '<div class="kort-verh"><h3>'+esc(t.imya)+'</h3>'+
+          (t.cena?'<div class="kort-cena">от <b class="num">'+t.cena+'</b> ₽</div>'
+                :(t.km?'<div class="kort-cena">'+t.km+' км</div>':''))+'</div>'+
+        '<div class="kort-zam" style="margin-top:6px">'+esc(t.chto)+'</div>'+
+        '<div class="kort-adr" style="margin:8px 0 0">'+esc(t.adr)+'</div>'+
+        (t.tel?'<a class="btn ghost big" style="width:100%;margin-top:12px;display:block;'+
+          'text-align:center" href="tel:'+attr(t.tel.replace(/\s/g,''))+
+          '">Позвонить · '+esc(t.tel)+'</a>'
+          :'<button class="btn big" style="width:100%;margin-top:12px" '+
+           'onclick="zakazatRazbor()">Заказать разбор</button>')+
+      '</div>';
+    }).join('')+
+
+    reklama('Магазин')+
+
+    '<div class="credit">Список составлен вручную и пока небольшой. '+
+    'Телефоны в демо-режиме условные.</div>';
+}
+
+function shopKn(z,p){
+  return '<button class="'+(SHOP_RAZDEL===z?'on':'')+'" '+
+    'onclick="SHOP_RAZDEL=\''+z+'\';paintShop()">'+p+'</button>';
+}
+
+function zakazatRazbor(){
+  toast('Оплата ещё не подключена');
+  var b=document.getElementById('shop-body');
+  var o=document.createElement('div');
+  o.className='note soft'; o.style.margin='14px 0 0';
+  o.innerHTML='<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/>'+
+    '<path d="M12 8v5M12 16.5v.01"/></svg><span>Приём оплаты пока не подключён. '+
+    'Загрузи запись во вкладке «Тренер» — разбор соберётся автоматически, '+
+    'а живого тренера подключим, как только заработают платежи.</span>';
+  b.appendChild(o); o.scrollIntoView({block:'center',behavior:'smooth'});
+}
+
+/* ═══════════════════════════════════════════════════
+   ГЛАВНАЯ · бронирование
+   Турниры закреплены сверху, дальше корты по фильтрам.
+   Ни одна кнопка не притворяется работающей.
+   ═══════════════════════════════════════════════════ */
+
+var SPORT='oba';            // tennis | padel | oba
+var TOCHKA=null;            // уточнённая точка внутри города
+var F_KRYT=false;           // только крытые
+var F_POKR='vse';           // покрытие
+var F_CENA=0;               // потолок цены, 0 — без потолка
+
+var GLAV='kort';
+
+function glavTo(w){
+  GLAV=w;
+  document.getElementById('home-korty').style.display=(w==='kort')?'block':'none';
+  document.getElementById('trn-pin').style.display=(w==='turn')?'block':'none';
+  document.getElementById('sg-kort').classList.toggle('on',w==='kort');
+  document.getElementById('sg-turn').classList.toggle('on',w==='turn');
+  if(w==='turn')narisovatTurniry();
+  document.querySelector('#s-home .scroll').scrollTop=0;
+}
+
+function narisovatTurniry(){
+  var pin=document.getElementById('trn-pin');
+  if(!pin)return;
+  pin.innerHTML=
+    '<div class="vvod">Турниры под твой уровень — <b>'+esc(S.lvl)+'</b>. '+
+    'Тапни, чтобы оставить заявку на участие.</div>'+
+    TOURNAMENTS.map(function(x,i){
+      return '<button class="trn trn-tap" onclick="otkrytTurnir('+i+')">'+
+        '<div class="trn-date"><div class="d num">'+x[0]+'</div>'+
+        '<div class="m">'+x[1]+'</div></div>'+
+        '<div class="trn-body"><div class="t">'+esc(x[2])+'</div>'+
+        '<div class="p">'+esc(x[3])+'</div></div>'+
+        '<div class="trn-go">›</div></button>';
+    }).join('')+
+    reklama('Турниры');
+}
+
+function otkrytTurnir(i){
+  var t=TOURNAMENTS[i];
+  document.getElementById('trn-body').innerHTML=
+    '<h3 style="font-size:19px;margin-bottom:4px">'+esc(t[2])+'</h3>'+
+    '<div class="bar-n" style="margin-bottom:16px">'+esc(t[3])+' · '+
+      t[0]+' '+esc(t[1])+'</div>'+
+    '<div class="field"><label>Телефон для связи</label>'+
+      '<input id="trn-tel" type="tel" inputmode="tel" placeholder="+7"></div>'+
+    '<div class="field"><label>Разряд или уровень</label>'+
+      '<input id="trn-lvl" value="'+attr(S.lvl)+'"></div>'+
+    '<button class="btn big" style="width:100%" onclick="zayavkaTurnir()">'+
+      'Оставить заявку на участие</button>'+
+    '<div class="credit">Регистрация и оплата участия ещё не подключены. '+
+    'Заявка — это запрос на связь: мы свяжемся и подскажем, как заявиться.</div>';
+  openSheet('sh-trn');
+}
+
+function zayavkaTurnir(){
+  var tel=(document.getElementById('trn-tel')||{}).value||'';
+  if(tel.replace(/\D/g,'').length<10){toast('Проверь номер');return}
+  closeSheet('sh-trn');
+  toast('Заявка записана — свяжемся');
+}
+
+function sportOK(k){
+  if(SPORT==='oba')return true;
+  return (k.sport||['tennis']).indexOf(SPORT)>=0;
+}
+
+function narisovatGlavnuyu(){
+  var box=document.getElementById('home-korty');
+  if(!box)return;
+
+  var spisok=KORTY.filter(function(k){
+    if(k.gorod!==GOROD_TEK)return false;
+    if(!sportOK(k))return false;
+    if(F_KRYT && !k.kryt)return false;
+    if(F_POKR!=='vse' && k.pokrytie.indexOf(F_POKR)<0)return false;
+    if(F_CENA && k.cena_bud>F_CENA)return false;
+    return true;
+  });
+
+  if(KORTY_SORT==='cena')spisok.sort(function(a,b){return a.cena_bud-b.cena_bud});
+  else if(KORTY_SORT==='blizko')spisok.sort(function(a,b){return (a.km||99)-(b.km||99)});
+  else spisok.sort(function(a,b){
+    return (b.ai?1:0)-(a.ai?1:0) || a.cena_bud-b.cena_bud });
+
+  box.innerHTML=
+    '<div class="seg" style="margin:0 0 10px">'+
+      knopka('SPORT','tennis','Теннис')+
+      knopka('SPORT','padel','Падл')+
+      knopka('SPORT','oba','Оба')+
+    '</div>'+
+
+    '<button class="geo" onclick="utochnitTochku()">'+
+      '<svg viewBox="0 0 24 24"><path d="M12 21s7-6 7-11a7 7 0 10-14 0c0 5 7 11 7 11z"/>'+
+      '<circle cx="12" cy="10" r="2.4"/></svg>'+
+      '<span>'+esc(GOROD_TEK)+(TOCHKA?' · '+esc(TOCHKA):'')+'</span>'+
+      '<b>уточнить</b></button>'+
+
+    '<div class="filtry">'+
+      '<button class="'+(F_KRYT?'on':'')+'" onclick="F_KRYT=!F_KRYT;narisovatGlavnuyu()">Крытые</button>'+
+      pokrKnopka('vse','Любое')+pokrKnopka('Хард','Хард')+
+      pokrKnopka('Грунт','Грунт')+pokrKnopka('Падл','Падл')+
+      '<button class="'+(F_CENA?'on':'')+'" onclick="F_CENA=F_CENA?0:2500;narisovatGlavnuyu()">'+
+        'до 2500 ₽</button>'+
+    '</div>'+
+
+    '<div class="itog"><b class="num">'+spisok.length+'</b> '+
+      sklonKort(spisok.length)+' в городе '+esc(GOROD_TEK)+
+      '<div class="itog-sort">'+
+        sortKn('ai','С анализом')+sortKn('blizko','Ближе')+sortKn('cena','Дешевле')+
+      '</div></div>'+
+
+    (spisok.length
+      ? spisok.map(kartochkaKorta).join('')
+      : '<div class="pusto">Под эти фильтры ничего нет.<br>'+
+        'Сбрось часть условий или добавь свой город.</div>')+
+
+    reklama('Корты')+
+
+    '<button class="btn ghost big" style="width:100%;margin-top:6px" '+
+      'onclick="openSheet(\'sh-gorod\')">Нет твоего города? Напиши нам</button>'+
+
+    '<div class="credit">Список пока небольшой и составлен вручную, '+
+    'цены ориентировочные — уточняйте в клубе. Бронирование не подключено.</div>';
+}
+
+function sklonKort(n){
+  var a=n%10,b=n%100;
+  if(b>=11&&b<=14)return 'кортов';
+  if(a===1)return 'корт';
+  if(a>=2&&a<=4)return 'корта';
+  return 'кортов';
+}
+function sortKn(z,p){
+  return '<button class="'+(KORTY_SORT===z?'on':'')+'" '+
+    'onclick="KORTY_SORT=\''+z+'\';narisovatGlavnuyu()">'+p+'</button>';
+}
+
+function knopka(peremen,znach,podpis){
+  var tek=(peremen==='SPORT')?SPORT:KORTY_SORT;
+  return '<button class="'+(tek===znach?'on':'')+'" '+
+    'onclick="'+peremen+'=\''+znach+'\';narisovatGlavnuyu()">'+podpis+'</button>';
+}
+function pokrKnopka(z,p){
+  return '<button class="'+(F_POKR===z?'on':'')+'" '+
+    'onclick="F_POKR=\''+z+'\';narisovatGlavnuyu()">'+p+'</button>';
+}
+
+function kartochkaKorta(k){
+  return '<div class="kort'+(k.ai?' kort-ai':'')+'">'+
+    (k.ai?'<div class="kort-lenta">AI-съёмка и анализ</div>':'')+
+    '<div class="kort-verh"><h3>'+esc(k.imya)+'</h3>'+
+      '<div class="kort-cena"><b class="num">'+k.cena_bud+'</b> ₽/час</div></div>'+
+    '<div class="kort-adr">'+esc(k.rayon)+(k.km?' · '+k.km+' км':'')+'</div>'+
+    '<div class="meta">'+
+      k.pokrytie.map(function(p){
+        var kl=p==='Грунт'?'clay':(p==='Падл'?'':'hard');
+        return '<span class="pill '+kl+'">'+esc(p)+'</span>'}).join('')+
+      '<span class="pill">'+k.kortov+' кортов · '+k.kryt+' крытых</span>'+
+    '</div>'+
+    '<div class="kort-niz">'+esc(k.chasy)+' · выходные '+k.cena_vyh+' ₽</div>'+
+    (k.zametka?'<div class="kort-zam">'+esc(k.zametka)+'</div>':'')+
+    '<button class="btn big'+(k.ai?'':' ghost')+'" style="width:100%;margin-top:13px" '+
+      'onclick="zabronirovat(\''+attr(k.imya)+'\')">Забронировать</button>'+
+  '</div>';
+}
+
+function utochnitTochku(){
+  var t=prompt('Район, метро или адрес — от этой точки подберём ближайшие корты',
+               TOCHKA||'');
+  if(t===null)return;
+  TOCHKA=t.trim()||null;
+  KORTY_SORT='blizko';
+  paintHome();
+}
+
+/* Рекламное место. Пока никого не рекламируем — только показываем,
+   как это будет выглядеть и где. Подписан честно. */
+function reklama(gde){
+  if(S.podpiska)return '';
+  return '<div class="reklama"><span class="reklama-mtk">Реклама</span>'+
+    '<div class="reklama-telo">Здесь будет баннер · '+esc(gde)+'</div>'+
+    '<button onclick="tab(\'s-me\')">Убрать рекламу</button></div>';
 }
 
 /* ═══ ПОИСК ═══ */
@@ -2066,31 +2592,41 @@ var GOROD_TEK = 'Москва';
 var KORTY_SORT = 'ai';
 
 var KORTY = [
-  { gorod:'Москва', imya:'Теннисный центр «Спартак»',
-    rayon:'Сокольники · Майский просек, 7с7',
+  { gorod:'Москва', imya:'Теннисный центр «Спартак»', sport:['tennis'],
+    rayon:'Сокольники · Майский просек, 7с7', km:4.2,
     kortov:32, pokrytie:['Грунт','Хард'], kryt:16,
     cena_bud:2300, cena_vyh:2600, chasy:'07:00 — 23:00',
     ai:true, partner:true,
     zametka:'Крупнейший теннисный центр страны, принимает турниры ITF.' },
 
-  { gorod:'Москва', imya:'Теннисная академия «Динамо»',
-    rayon:'Петровский парк', kortov:12, pokrytie:['Хард'], kryt:6,
+  { gorod:'Москва', imya:'Теннисная академия «Динамо»', sport:['tennis'],
+    rayon:'Петровский парк', km:6.8, kortov:12, pokrytie:['Хард'], kryt:6,
     cena_bud:2000, cena_vyh:2400, chasy:'08:00 — 22:00' },
 
-  { gorod:'Москва', imya:'Корты в Лужниках',
-    rayon:'Хамовники', kortov:8, pokrytie:['Хард'], kryt:4,
+  { gorod:'Москва', imya:'Корты в Лужниках', sport:['tennis','padel'],
+    rayon:'Хамовники', km:3.1, kortov:8, pokrytie:['Хард'], kryt:4,
     cena_bud:1800, cena_vyh:2200, chasy:'07:00 — 23:00' },
 
-  { gorod:'Москва', imya:'Клуб «Чайка»',
-    rayon:'Остоженка', kortov:6, pokrytie:['Грунт'], kryt:2,
+  { gorod:'Москва', imya:'Клуб «Чайка»', sport:['tennis'],
+    rayon:'Остоженка', km:2.4, kortov:6, pokrytie:['Грунт'], kryt:2,
     cena_bud:2800, cena_vyh:3200, chasy:'08:00 — 22:00' },
 
-  { gorod:'Санкт-Петербург', imya:'Клуб на Крестовском',
-    rayon:'Петроградский', kortov:10, pokrytie:['Хард','Грунт'], kryt:5,
+  { gorod:'Санкт-Петербург', imya:'Клуб на Крестовском', sport:['tennis','padel'],
+    rayon:'Петроградский', km:5.0, kortov:10, pokrytie:['Хард','Грунт'], kryt:5,
     cena_bud:1900, cena_vyh:2300, chasy:'07:00 — 23:00' },
 
-  { gorod:'Казань', imya:'Академия тенниса',
-    rayon:'Вахитовский', kortov:14, pokrytie:['Хард'], kryt:8,
+  { gorod:'Москва', imya:'Padel Friends', sport:['padel'],
+    rayon:'Динамо · Ленинградский пр-т', km:7.5, kortov:6,
+    pokrytie:['Падл'], kryt:6, cena_bud:3200, cena_vyh:3800,
+    chasy:'07:00 — 24:00' },
+
+  { gorod:'Москва', imya:'Padel Time',
+    sport:['padel'], rayon:'Сити · Пресненская наб.', km:5.9, kortov:4,
+    pokrytie:['Падл'], kryt:4, cena_bud:3600, cena_vyh:4200,
+    chasy:'08:00 — 23:00' },
+
+  { gorod:'Казань', imya:'Академия тенниса', sport:['tennis'],
+    rayon:'Вахитовский', km:3.7, kortov:14, pokrytie:['Хард'], kryt:8,
     cena_bud:1400, cena_vyh:1700, chasy:'07:00 — 22:00' }
 ];
 
@@ -2969,7 +3505,35 @@ function savePdf(){
 }
 
 /* ═══ ПРОФИЛЬ ═══ */
+/* Подписка. Приём денег требует ИП и эквайринга — пока их нет,
+   кнопка честно говорит об этом, а не изображает оплату. */
+function narisovatPodpisku(){
+  var b=document.getElementById('podpiska-box');
+  if(!b)return;
+  b.innerHTML= S.podpiska
+    ? '<div class="kort-verh"><h3>Подписка активна</h3></div>'+
+      '<div class="kort-zam">Реклама скрыта.</div>'+
+      '<button class="btn ghost" style="width:100%;margin-top:12px" '+
+      'onclick="S.podpiska=false;save();paintProfile();paintHome();">Отключить</button>'
+    : '<div class="kort-verh"><h3>Без рекламы</h3>'+
+      '<div class="kort-cena"><b class="num">299</b> ₽/мес</div></div>'+
+      '<div class="kort-zam">Убирает рекламные места на всех вкладках. '+
+      'Разборы и корты работают и без подписки.</div>'+
+      '<button class="btn big" style="width:100%;margin-top:13px" '+
+      'onclick="oformitPodpisku()">Оформить подписку</button>'+
+      '<div class="kort-zam" style="opacity:.6;margin-top:8px">'+
+      'Оплата ещё не подключена.</div>';
+}
+
+function oformitPodpisku(){
+  // Демо-режим: включаем локально, денег не берём и не притворяемся,
+  // что взяли. Настоящий эквайринг — после регистрации ИП.
+  S.podpiska=true; save(); paintProfile(); paintHome();
+  toast('Демо-режим: реклама скрыта, оплата не списана');
+}
+
 function paintProfile(){
+  narisovatPodpisku();
   document.getElementById('pf-av').textContent=(S.name[0]||'—').toUpperCase();
   document.getElementById('pf-n').textContent=S.name||'—';
   document.getElementById('pf-d').textContent=S.lvl+' · '+S.hand+' рука · '+S.bh;

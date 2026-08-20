@@ -33,7 +33,9 @@ a{color:var(--ball);text-decoration:none}
 .eyebrow{font-family:'Oswald',sans-serif;font-weight:400;font-size:11px;
   letter-spacing:.22em;text-transform:uppercase;color:var(--dim-2)}
 .num{font-family:'Oswald',sans-serif;font-weight:500;font-variant-numeric:tabular-nums}
-#app{position:fixed;top:0;left:0;right:0;height:100dvh;
+/* Высота по реально видимой области: при клавиатуре окно сжимается,
+   и поле ввода остаётся над ней, а меню уезжает вниз. */
+#app{position:fixed;top:0;left:0;right:0;height:100dvh;height:var(--vh,100dvh);
   overflow:hidden;max-width:520px;margin:0 auto;
   border-left:1px solid var(--edge);border-right:1px solid var(--edge)}
 
@@ -852,7 +854,7 @@ var CONFIG = {
   BASE:'https://stats.tennismylife.org/data/',
   YEARS:[2026,2025,2024,2023,2022],
   PRICE_SCOUT:4900,
-  VERSION:'v24 · эргономика и структура'
+  VERSION:'v25 · клавиатура и поля ввода'
 };
 var KEY='moytrener.v2';
 
@@ -2268,53 +2270,35 @@ function dropVideo(i){
 
 /* ═══════════════════════════════════════════════════
    КЛАВИАТУРА НА iOS
-   Safari при фокусе выталкивает всю страницу вверх, и
-   «position:fixed» уезжает вместе с ней — шапка режется.
-   Приложение высоту НЕ меняем: пусть клавиатура просто
-   накрывает низ. Прячем только нижнее меню, иначе оно
-   выедет поверх клавиатуры.
+   Safari не сжимает страницу, а выталкивает её вверх —
+   поле ввода уезжает за экран. Ловим видимую высоту,
+   отдаём в CSS и прячем нижнее меню.
    ═══════════════════════════════════════════════════ */
 (function(){
   var vv=window.visualViewport;
+  if(!vv)return;
 
-  function derzhat(){
-    // Safari сдвигает страницу, хотя скроллить нечего — возвращаем
-    if(window.scrollY!==0||window.pageYOffset!==0)window.scrollTo(0,0);
+  function apply(){
+    document.documentElement.style.setProperty('--vh',vv.height+'px');
+    if(window.scrollY!==0)window.scrollTo(0,0);
+    document.body.classList.toggle('klava', vv.height<window.innerHeight*0.75);
   }
 
-  function proverit(){
-    if(!vv)return;
-    // Клавиатура съела заметный кусок экрана
-    var klava = vv.height < window.innerHeight * 0.75;
-    document.body.classList.toggle('klava',klava);
-    derzhat();
-  }
+  vv.addEventListener('resize',apply);
+  vv.addEventListener('scroll',apply);
+  window.addEventListener('orientationchange',function(){setTimeout(apply,300)});
 
-  if(vv){
-    vv.addEventListener('resize',proverit);
-    vv.addEventListener('scroll',derzhat);
-  }
-
-  // Подстраховка: Safari дёргает скролл уже после focus
   document.addEventListener('focusin',function(e){
-    var t=e.target;
-    if(!t||!/^(INPUT|TEXTAREA)$/.test(t.tagName))return;
-    setTimeout(derzhat,50);
+    if(!/^(INPUT|TEXTAREA)$/.test(e.target.tagName))return;
+    setTimeout(apply,60);
     setTimeout(function(){
-      derzhat();
-      // подвести поле к центру видимой области
-      try{t.scrollIntoView({block:'center',behavior:'smooth'})}catch(_){}
-    },250);
+      apply();
+      try{e.target.scrollIntoView({block:'center',behavior:'smooth'})}catch(_){}
+    },280);
   });
 
-  document.addEventListener('focusout',function(){
-    setTimeout(function(){
-      document.body.classList.remove('klava');
-      derzhat();
-    },80);
-  });
-
-  window.addEventListener('scroll',derzhat,{passive:true});
+  document.addEventListener('focusout',function(){setTimeout(apply,120)});
+  apply();
 })();
 
 var MOM_VID = null;
